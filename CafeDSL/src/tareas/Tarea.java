@@ -5,8 +5,6 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import mensajeria.Mensaje;
 
 /**
@@ -39,7 +37,6 @@ public abstract class Tarea implements Runnable {
      */
     protected ObjectOutputStream[] salidas;
 
-
     /**
      * Constructor para la creación de tareas.
      *
@@ -57,12 +54,15 @@ public abstract class Tarea implements Runnable {
 		this.entradas[i] = new ObjectInputStream(entradaTub[i]);
 	    }
 
-	    //Inicia los streams de salida, las tuberías se conectan cuando se establece la conexión en el destino.
+	    //Prepara los streams de salida pero no los puede arrancar hasta que
+	    //las tuberías se conecten cuando se establece la conexión en el destino.
+	    //Usar abrir() antes de ejecutar el hilo.
 	    salidasTub = new PipedOutputStream[salidas];
 	    this.salidas = new ObjectOutputStream[salidas];
 	    for (int i = 0; i < salidas; i++) {
-		this.salidas[i] = new ObjectOutputStream(salidasTub[i]);
+		this.salidasTub[i] = new PipedOutputStream();
 	    }
+
 	} catch (IOException ex) {	//si se produce algún error con los streams
 	    Exception e = new Exception("Error al crear la tarea, hay problemas con los slots");
 	    e.addSuppressed(ex);
@@ -158,6 +158,20 @@ public abstract class Tarea implements Runnable {
 	return salidas.length;
     }
 
+    public void abrir() throws Exception {
+	for (int i = 0; i < salidas.length; i++) {
+	    try {
+		//this.salidasTub[i] = new PipedOutputStream();
+		this.salidas[i] = new ObjectOutputStream(salidasTub[i]);
+	    } catch (IOException ex) {
+		//cerrar();
+		Exception e = new Exception("Error al intentar conectarse a la tubería.");
+		e.addSuppressed(ex);
+		throw e;
+	    }
+	}
+    }
+
     /**
      * Cierra la tarea e intenta propagar un mensaje de apagado a sus vecinos.
      *
@@ -166,63 +180,63 @@ public abstract class Tarea implements Runnable {
      */
     public boolean cerrar() {
 	boolean ret = true;
-	for (ObjectOutputStream salida : salidas)
+	for (ObjectOutputStream salida : salidas) {
 	    try {
-	    salida.writeObject(new Mensaje(Mensaje.APAGAR_SISTEMA));
-	    salida.flush();
-	    salida.close();
-	} catch (IOException ex) {
-	    Logger.getLogger(Tarea.class.getName()).log(Level.SEVERE, null, ex);
-	    ret = false;
+		salida.writeObject(new Mensaje(Mensaje.APAGAR_SISTEMA));
+		salida.flush();
+		salida.close();
+	    } catch (IOException ex) {
+		//comprueba si es una excepción real, o si es porque el vecino ya estaba cerrado
+		ret = ex.getMessage().contains("Pipe closed") && ret;
+	    }
 	}
 	for (PipedOutputStream salida : salidasTub) {
 	    try {
 		salida.flush();
 		salida.close();
 	    } catch (IOException ex) {
-		Logger.getLogger(Tarea.class.getName()).log(Level.SEVERE, null, ex);
-		ret = false;
+		ret = ex.getMessage().contains("Pipe closed") && ret;
 	    }
 	}
 	for (ObjectInputStream entrada : entradas) {
 	    try {
 		entrada.close();
 	    } catch (IOException ex) {
-		Logger.getLogger(Tarea.class.getName()).log(Level.SEVERE, null, ex);
-		ret = false;
+		ret = ex.getMessage().contains("Pipe closed") && ret;
 	    }
 	}
 	for (PipedInputStream entrada : entradasTub) {
 	    try {
 		entrada.close();
 	    } catch (IOException ex) {
-		Logger.getLogger(Tarea.class.getName()).log(Level.SEVERE, null, ex);
-		ret = false;
+		ret = ex.getMessage().contains("Pipe closed") && ret;
 	    }
 	}
 	return ret;
     }
 
     @Override
-    public abstract void run();	//Implementar la lógica de la tarea.
+    public abstract void run(); //Implementar la lógica de la tarea.
+
 //    {
-//	/** Ejemplo básico de uso, reemplazar en las clases hija **/
-//	
+//	/**
+//	 * Ejemplo básico de uso, reemplazar en las clases hija *
+//	 */
 //	Mensaje m;
 //	String contenido = Mensaje.APAGAR_SISTEMA;
-//	
+//
 //	do {					    //ejecutarse hasta recibir la orden de apagado
 //	    try {
 //		m = leer(0);			    //La tarea se queda esperando a que le llegue un mensaje por el primer slot
-//		contenido = m.toString();	    //Guarda el contenido en una string
-//		System.out.println(contenido);	    //Lo muestra por pantalla
+//		contenido = m.toString();		    //Guarda el contenido en una string
+//		m.setMensaje(contenido + "!");	   //Añade un carácter al mensaje
 //		enviar(m, 0);			    //Reenvía el mensaje por el primer slot
 //	    } catch (Exception ex) {
-//		System.out.println(ex.toString());  //si hay algún error, mostrarlo por pantalla y seguir ejecutando
+//		System.out.println(ex.toString());	    //si hay algún error, mostrarlo por pantalla y seguir ejecutando
 //	    }
-//	} while (contenido.equals(Mensaje.MSG_APAGAR_SISTEMA));
-//	
-//	cerrar();				    //Una vez ha recibido la orden de apagado, apagarse y propagar el mensaje
+//	} while (!contenido.equals(Mensaje.APAGAR_SISTEMA));
+//
+//	cerrar();
 //    }
 
 }
