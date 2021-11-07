@@ -1,9 +1,10 @@
-package tareas;
+package tests;
 
 import java.io.IOException;
 import java.util.Scanner;
 import mensajeria.Mensaje;
 import mensajeria.Slot;
+import tareas.Tarea;
 
 /**
  * Tester de tareas (Para ejecutar, Shift+F6)

@@ -51,7 +51,7 @@ public abstract class Tarea implements Runnable {
      * @return Slot de salida listo para ser usado.
      * @throws Exception Si se ha introducido un índice inválido.
      */
-    protected Slot getSlotSalida(int puerto) throws Exception {
+    public Slot getSlotSalida(int puerto) throws Exception {
 	try {
 	    return salidas[puerto];
 	} catch (IndexOutOfBoundsException ex) {
