@@ -24,7 +24,7 @@ public class PuertoEntrada implements Runnable {
     /**
      * Constructor del puerto
      *
-     * @param puerto Puerto (socket) al que escuchar.
+     * @param puerto Puerto (socket) al que escuchar. (0-65535)
      * @throws Exception si hay problemas al crear el Slot de salida.
      */
     public PuertoEntrada(int puerto) throws Exception {

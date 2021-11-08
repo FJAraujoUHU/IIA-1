@@ -134,6 +134,9 @@ public abstract class Tarea implements Runnable {
 	}
     }
 
+    /**
+     * Implementar la lógica de la tarea en la subclase.
+     */
     @Override
-    public abstract void run(); //Implementar la lógica de la tarea.
+    public abstract void run();
 }

@@ -90,7 +90,11 @@ public class Mensaje implements Serializable, Cloneable {
 	mensaje = nuevoMensaje;
     }
     
-    @Override	//para leer el mensaje
+    /**
+     * Para leer el mensaje interno
+     * @return String del mensaje interno
+     */
+    @Override
     public String toString()	{
 	return mensaje;
     }

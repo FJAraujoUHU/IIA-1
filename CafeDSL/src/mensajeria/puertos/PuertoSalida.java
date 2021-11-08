@@ -23,7 +23,7 @@ public class PuertoSalida implements Runnable {
      * Constructor del puerto
      *
      * @param host Dirección a la que conectarse.
-     * @param puerto Puerto del destino.
+     * @param puerto Puerto del destino. (0-65535)
      * @param entrada Slot por el que recibir mensajes.
      */
     public PuertoSalida(String host, int puerto, Slot entrada) {

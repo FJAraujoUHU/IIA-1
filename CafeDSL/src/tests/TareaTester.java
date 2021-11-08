@@ -48,6 +48,8 @@ public class TareaTester {
     /**
      * Main para probar el funcionamiento de tareas, implementar según necesidad
      * @param args the command line arguments
+     * @throws java.io.IOException
+     * @throws java.lang.Exception
      */
     public static void main(String[] args) throws IOException, Exception {
 
