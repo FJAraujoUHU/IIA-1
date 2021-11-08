@@ -2,12 +2,14 @@ package tests;
 
 import mensajeria.Mensaje;
 import mensajeria.Slot;
-import mensajeria.puertos.PuertoEntrada;
+import mensajeria.puertos.*;
 import tareas.Tarea;
 
 /**
- * Tester de puertos, usar junto Mensajero.java (Para ejecutar, Shift+F6)
- * ESTA CLASE NO DEBERÍA SER LA MAIN POR DEFECTO, COMPROBAR EN PROPIEDADES DEL PROYECTO
+ * Tester de puertos, usar junto Mensajero.java (Para ejecutar, Shift+F6) ESTA
+ * CLASE NO DEBERÍA SER LA MAIN POR DEFECTO, COMPROBAR EN PROPIEDADES DEL
+ * PROYECTO
+ *
  * @author Francisco Javier Araujo Mendoza
  */
 public class PuertoTester {
@@ -46,7 +48,8 @@ public class PuertoTester {
     }
 
     /**
-     * Main para probar el funcionamiento de puertos, implementar según necesidad
+     * Main para probar el funcionamiento de puertos, implementar según
+     * necesidad
      *
      * @param args the command line arguments
      */
@@ -57,34 +60,44 @@ public class PuertoTester {
 	Mensaje m;
 	TareaEjemplo te;
 	PuertoEntrada pe;
-	Thread thr1, thr2;
-
-	Slot salida;
+	PuertoSalida ps;
+	Thread thr1, thr2, thr3;
 
 	//definición de tareas y conexión
 	pe = new PuertoEntrada(7777);
 	te = new TareaEjemplo(pe.getSlotSalida());
-	salida = te.getSlotSalida(0);
+	ps = new PuertoSalida("localhost", 8888, te.getSlotSalida(0));
 
 	//arranco las tareas
 	thr1 = new Thread(pe);
 	thr2 = new Thread(te);
+	thr3 = new Thread(ps);
 	thr1.start();
 	thr2.start();
+	thr3.start();
 
-	try {
-	while (!txt.equals(Mensaje.APAGAR_SISTEMA)) {			    //meter mensaje por pantalla, enviar "-1" para cerrar el sistema
-	    m = salida.recibir();
-	    txt = m.toString();
-	    System.out.println(">" + txt);
-	}
+	/*try {
+	    while (pe.abierto() && ps.abierto()) {			    //meter mensaje por pantalla, enviar "-1" para cerrar el sistema
+		m = salida.recibir();
+		txt = m.toString();
+		System.out.println(">" + txt);
+	    }
 	} catch (Exception ex) {
-	    if (!ex.getMessage().contains("cerrado")) throw ex;
-	}
+	    if (!ex.getMessage().contains("cerrado")) {
+		throw ex;
+	    }
+	}*/
 
-	pe.cerrar();
+	if (pe.abierto()) {
+	    pe.cerrar();
+	}
 	thr1.join(10000);
 	thr2.join(10000);
+	thr3.join(10000);
+	if (pe.abierto())
+	    pe.cerrar();
+	if (ps.abierto())
+	    ps.cerrar();
     }
 
 }
