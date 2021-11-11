@@ -10,7 +10,7 @@ import java.net.Socket;
 import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import mensajeria.Mensaje;
+import messaging.Message;
 
 /**
  * Tester/placeholder de conector de aplicaciones (Para ejecutar, Shift+F6)
@@ -64,11 +64,11 @@ public class Mensajero {
 		ObjectOutputStream oos = new ObjectOutputStream(os);
 
 		input = "";
-		while (!input.equals(Mensaje.APAGAR_SISTEMA)) {
+		while (!input.equals(Message.SHUTDOWN)) {
 		    input = sc.nextLine();
-		    if (input.equals("-1")) input = Mensaje.APAGAR_SISTEMA;
-		    Mensaje m = new Mensaje(input);
-		    System.out.println("Enviando \"" + m + "\", ID=" + m.getIdInterna() + "...");
+		    if (input.equals("-1")) input = Message.SHUTDOWN;
+		    Message m = new Message(input);
+		    System.out.println("Enviando \"" + m + "\", ID=" + m.getInternalID() + "...");
 		    oos.writeObject(m);
 		}
 		System.out.println("Cerrando puerto y saliendo...");
@@ -104,10 +104,10 @@ public class Mensajero {
 		//Crea un objectInput para sacar mensajes desde ahí
 		ObjectInputStream ois = new ObjectInputStream(is);
 		
-		Mensaje m;
-		while (!input.equals(Mensaje.APAGAR_SISTEMA) && !socket.isClosed()) {
-		    m = (Mensaje) ois.readObject();
-		    System.out.println("Mensaje de " + socket.getInetAddress().getCanonicalHostName() + ":" + socket.getPort() + " ID=" + m.getIdInterna() + ":");
+		Message m;
+		while (!input.equals(Message.SHUTDOWN) && !socket.isClosed()) {
+		    m = (Message) ois.readObject();
+		    System.out.println("Mensaje de " + socket.getInetAddress().getCanonicalHostName() + ":" + socket.getPort() + " ID=" + m.getInternalID() + ":");
 		    System.out.println(m);
 		    input = m.toString();
 		}

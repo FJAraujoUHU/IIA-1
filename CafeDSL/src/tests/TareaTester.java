@@ -2,9 +2,9 @@ package tests;
 
 import java.io.IOException;
 import java.util.Scanner;
-import mensajeria.Mensaje;
-import mensajeria.Slot;
-import tareas.Tarea;
+import messaging.Message;
+import messaging.Slot;
+import tasks.Task;
 
 /**
  * Tester de tareas (Para ejecutar, Shift+F6)
@@ -14,31 +14,31 @@ import tareas.Tarea;
 public class TareaTester {
 
     //Tarea genérica de un slot de entrada y otro de salida, que añade un "!" a lo que le entra y lo reenvía.
-    private static class TareaEjemplo extends Tarea {
+    private static class TareaEjemplo extends Task {
 	public TareaEjemplo(Slot entrada) throws Exception {
 	    super(new Slot[]{entrada}, 1);
 	}
 
 	@Override
 	public void run() {
-	    Mensaje m;
+	    Message m;
 	    String contenido;
 
 	    do {					    //ejecutarse hasta recibir la orden de apagado/se cierre un slot
 		try {
-		    m = recibir(0);			    //La tarea se queda esperando a que le llegue un mensaje por el primer slot
+		    m = receive(0);			    //La tarea se queda esperando a que le llegue un mensaje por el primer slot
 		    contenido = m.toString();		    //Guarda el contenido en una string
-		    m.setMensaje(contenido + "!");	   //Añade un carácter al mensaje
-		    enviar(m, 0);			    //Reenvía el mensaje por el primer slot
+		    m.setMessage(contenido + "!");	   //Añade un carácter al mensaje
+		    send(m, 0);			    //Reenvía el mensaje por el primer slot
 		} catch (Exception ex) {
 		    System.out.println(ex.toString());	    //si hay algún error, mostrarlo por pantalla y seguir ejecutando
-		    contenido = Mensaje.APAGAR_SISTEMA;
+		    contenido = Message.SHUTDOWN;
 		    
 		}
-	    } while (!contenido.equals(Mensaje.APAGAR_SISTEMA) && entradas[0].abierto() && salidas[0].abierto());
+	    } while (!contenido.equals(Message.SHUTDOWN) && in[0].available() && out[0].available());
 
 	    try {
-		cerrar();
+		close();
 	    } catch (Exception ex) {
 		System.out.println(ex.toString());
 	    }
@@ -54,7 +54,8 @@ public class TareaTester {
     public static void main(String[] args) throws IOException, Exception {
 
 	String txt = "";
-	Mensaje m1, m2;
+	Message m1;
+        Message m2;
 	TareaEjemplo t1, t2;
 	Thread thr1, thr2;
 
@@ -63,8 +64,8 @@ public class TareaTester {
 	
 	//definición de tareas y conexión
 	t1 = new TareaEjemplo(entrada);			//tarea 1, le paso el slot
-	t2 = new TareaEjemplo(t1.getSlotSalida(0));	//tarea 2, conectada a la salida de tarea 1
-	salida = t2.getSlotSalida(0);			//me quedo con la salida de tarea 2 para mostrarla
+	t2 = new TareaEjemplo(t1.getExitSlot(0));	//tarea 2, conectada a la salida de tarea 1
+	salida = t2.getExitSlot(0);			//me quedo con la salida de tarea 2 para mostrarla
 	
 	//arranco las tareas
 	thr1 = new Thread(t1);
@@ -76,16 +77,16 @@ public class TareaTester {
 	while (!txt.equals("-1")) {			    //meter mensaje por pantalla, enviar "-1" para cerrar el sistema
 	    txt = in.nextLine();
 	    if (!txt.equals("-1"))
-		m1 = new Mensaje(txt);
+		m1 = new Message(txt);
 	    else
-		m1 = new Mensaje(Mensaje.APAGAR_SISTEMA);
-	    entrada.enviar(m1);				    //envía el mensaje por el slot a t1
-	    m2 = salida.recibir();			    //espera a recibir la respuesta de t2
+		m1 = new Message(Message.SHUTDOWN);
+	    entrada.send(m1);				    //envía el mensaje por el slot a t1
+	    m2 = salida.receive();			    //espera a recibir la respuesta de t2
 	    System.out.println(">" + m2.toString());	    //y la muestra por pantalla
 	}
 
-	t1.cerrar();					    //cerrar el sistema
-	t2.cerrar();
+	t1.close();					    //cerrar el sistema
+	t2.close();
 	thr1.join(10000);
 	thr2.join(10000);
     }
