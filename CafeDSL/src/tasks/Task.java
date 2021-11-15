@@ -22,7 +22,7 @@ public abstract class Task implements Runnable {
      */
     protected Slot[] out;
     
-    private final UUID uuid;
+    protected final UUID uuid;
 
     /**
      * Constructor para la creación de tareas.
@@ -119,6 +119,14 @@ public abstract class Task implements Runnable {
     public int getOutputCount() {
 	return out.length;
     }
+    
+    /**
+     * Devuelve el UUID único de la tarea (es intransferible)
+     * @return UUID del objeto.
+     */
+    public UUID getUUID() {
+        return uuid;
+    }
 
     /**
      * Cierra la tarea e intenta propagar un mensaje de apagado a sus vecinos.
@@ -126,15 +134,30 @@ public abstract class Task implements Runnable {
      * @throws Exception Si se produce algún error que no sea intentar cerrar un Slot previamente cerrado.
      */
     public void close() throws Exception {
-	for (Slot salida : out) {
+	for (Slot output : out) {
 	    try {
-		salida.send(new Message(Message.SHUTDOWN));
-		salida.close();
+                if (output.available()) {
+                    output.send(new Message(Message.SHUTDOWN));
+                    output.close();
+                }
 	    } catch (Exception ex) {
 		if (!ex.getMessage().toUpperCase().contains("CLOSED"))
 		    throw ex;
 	    }
 	}
+    }
+    
+    /**
+     * Comprueba que todas las entradas y salidas están abiertas.
+     * @return True si todas están abiertas, False si alguna está cerrada.
+     */
+    public boolean flow()   {
+        boolean ret = true;
+        for (Slot input : in)
+            ret = ret && input.available();
+        for (Slot output : out)
+            ret = ret && output.available();
+        return ret;
     }
 
     /**

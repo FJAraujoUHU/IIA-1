@@ -13,10 +13,10 @@ import java.util.UUID;
  * fácilmente.
  * @author Francisco Javier Araujo Mendoza
  */
-public class Message implements Serializable, Cloneable {
+public class Message implements Serializable {
     private String message;
     private final long internalID;
-    private Integer publicID;
+    private Long publicID;
     private final UUID uuid;
     
     //Generador de ID internas
@@ -49,13 +49,26 @@ public class Message implements Serializable, Cloneable {
 	internalID = parent.internalID;
 	publicID = null;
         uuid = UUID.randomUUID();
-    }       
+    }
+
+    /**
+     * Constructor de la clase, diseñado para devolver un clon de otro mensaje.
+     * @param parent Mensaje a clonar.
+     */
+    public Message(Message parent) {
+        this.message = parent.message;
+        this.internalID = parent.internalID;
+        this.publicID = parent.publicID;
+        this.uuid = UUID.randomUUID();
+    }
+    
+    
     
     /**
      * Establece un Correlation ID para el mensaje.
      * @param id
      */
-    public void setId(int id) {
+    public void setId(long id) {
 	publicID = id;
     }
     
@@ -71,7 +84,7 @@ public class Message implements Serializable, Cloneable {
      * @return Correlation ID del mensaje.
      * @throws Exception Si el mensaje no tenía Correlation ID.
      */
-    public int getId() throws Exception {
+    public long getId() throws Exception {
 	if (publicID == null)
 	    throw new Exception("No se ha asignado ningún ID");
 	else return publicID;
@@ -110,4 +123,6 @@ public class Message implements Serializable, Cloneable {
     public String toString()	{
 	return message;
     }
+    
+    
 }
