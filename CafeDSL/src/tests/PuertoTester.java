@@ -28,8 +28,8 @@ public class PuertoTester {
 	Slot solicitud, respuesta;
 	
 	solicitud = new Slot();
-	ps = new SolicitorPort("localhost", 7777, solicitud);
-	respuesta = ps.getExitSlot();
+        respuesta = new Slot();
+	ps = new SolicitorPort("localhost", 7777, solicitud, respuesta);
 	
 	ps.start();
 	for (int i = 0; i < 5; i++) {

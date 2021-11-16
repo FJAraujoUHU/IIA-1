@@ -14,11 +14,11 @@ public class Replicator extends Task {
      * Constructor de un Replicator estándar.
      *
      * @param input Slot de entrada.
-     * @param nOutputs Número de salidas de la tarea.
+     * @param outputs Salidas de la tarea.
      * @throws Exception Si se produce un error al crear los Slots de salida.
      */
-    public Replicator(Slot input, int nOutputs) throws Exception {
-        super(new Slot[]{input}, nOutputs);
+    public Replicator(Slot input, Slot[] outputs) throws Exception {
+        super(new Slot[]{input}, outputs);
     }
 
     /**

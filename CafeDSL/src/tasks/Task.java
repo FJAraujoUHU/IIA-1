@@ -15,12 +15,12 @@ public abstract class Task implements Runnable {
     /**
      * Array que contiene los slots de entrada de la tarea.
      */
-    protected Slot[] in;
+    protected final Slot[] in;
 
     /**
      * Array que contiene los slots de salida de la tarea.
      */
-    protected Slot[] out;
+    protected final Slot[] out;
     
     protected final UUID uuid;
 
@@ -28,41 +28,12 @@ public abstract class Task implements Runnable {
      * Constructor para la creación de tareas.
      *
      * @param inputs array de Slots de entrada a la tarea.
-     * @param nOutputs número de salidas de la tarea.
-     * @throws Exception Si se produce un error al crear los Slots de salida.
+     * @param outputs array de Slots de salida a la tarea.
      */
-    public Task(Slot[] inputs, int nOutputs) throws Exception {
+    public Task(Slot[] inputs, Slot[] outputs) {
 	this.in = inputs;
-	this.out = new Slot[nOutputs];
+	this.out = outputs;
         this.uuid = UUID.randomUUID();
-	try {
-	    for (int i = 0; i < nOutputs; i++) {
-		out[i] = new Slot();
-	    }
-	} catch (Exception ex) {
-	    Exception e = new Exception("Error al crear la tarea, hay problemas con los slots");
-	    e.addSuppressed(ex);
-	    throw e;
-	}
-    }
-
-    /**
-     * Devuelve un Slot para conectar la salida de la tarea con la
-     * siguiente.
-     *
-     * @param slot índice del puerto de salida a obtener.
-     * @return Slot de salida listo para ser usado.
-     * @throws Exception Si se ha introducido un índice inválido.
-     */
-    public Slot getExitSlot(int slot) throws Exception {
-	try {
-	    return out[slot];
-	} catch (IndexOutOfBoundsException ex) {
-	    Exception e = new Exception("Index out of bounds :" + slot + "out of " + out.length);
-	    e.addSuppressed(ex);
-	    throw e;
-	}
-	
     }
 
     /**

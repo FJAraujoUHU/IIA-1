@@ -19,11 +19,11 @@ public class Splitter extends Task {
      * Constructor de un Splitter estándar.
      *
      * @param input Slot de entrada.
+     * @param output Slot de salida.
      * @param tag Etiqueta sobre la que hacer los splits.
-     * @throws Exception Si se produce un error al crear los Slots de salida.
      */
-    public Splitter(Slot input, String tag) throws Exception {
-        super(new Slot[]{input}, 1);
+    public Splitter(Slot input, Slot output, String tag) {
+        super(new Slot[]{input}, new Slot[]{output});
         if (tag.startsWith("<") && tag.endsWith(">")) {
             //Si se ha pasado en formato XML, quitar las marcas
             this.tag = tag.substring(1, tag.length() - 1);

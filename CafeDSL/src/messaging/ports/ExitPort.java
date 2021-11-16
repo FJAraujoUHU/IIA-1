@@ -49,13 +49,11 @@ public class ExitPort implements Runnable {
 	    enabled = true;
 
 	    Message m;
-	    String content = "";
-	    
-	    while (!content.equals(Message.SHUTDOWN) && !socket.isClosed() && enabled) {
-		m = slot.receive();
-		content = m.toString();
+            do {
+                m = slot.receive();
 		oos.writeObject(m);
-	    }
+            } while (!m.equals(Message.SHUTDOWN) && !socket.isClosed() && enabled);
+                    
 	    oos.flush();
 	} catch (Exception ex) {
 	    if (enabled) {

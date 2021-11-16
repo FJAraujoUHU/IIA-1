@@ -27,24 +27,16 @@ public class EntryPort implements Runnable {
      * Constructor del puerto
      *
      * @param socket Puerto (socket) al que escuchar. (0-65535)
+     * @param out Puerto de salida por el que enviar los mensajes.
      * @throws Exception si hay problemas al crear el Slot de salida.
      */
-    public EntryPort(int socket) throws Exception {
+    public EntryPort(int socket, Slot out) throws Exception {
 	this.port = socket;
-	this.slot = new Slot();
+	this.slot = out;
 	this.enabled = false;
 	this.socket = null;
 	this.ss = null;
         uuid = UUID.randomUUID();
-    }
-
-    /**
-     * Devuelve un Slot para conectar la salida del puerto con una tarea.
-     *
-     * @return Slot de salida listo para ser usado.
-     */
-    public Slot getExitSlot() {
-	return slot;
     }
 
     @Override
@@ -62,12 +54,11 @@ public class EntryPort implements Runnable {
 	    ObjectInputStream ois = new ObjectInputStream(is);
 
 	    Message m;
-	    String content = "";
-	    while (!content.equals(Message.SHUTDOWN) && !socket.isClosed() && enabled) {
-		m = (Message) ois.readObject();
-		content = m.toString();
+            do {
+                m = (Message) ois.readObject();
 		slot.send(m);
-	    }
+            } while (!m.equals(Message.SHUTDOWN) && !socket.isClosed() && enabled);
+            
 	} catch (Exception ex) {
 	    if (enabled) {
 		System.out.println(ex); //si el error no ha sido al cerrarse

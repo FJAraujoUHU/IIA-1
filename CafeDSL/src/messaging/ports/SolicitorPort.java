@@ -23,27 +23,20 @@ public class SolicitorPort {
      * @param host Dirección a la que conectarse.
      * @param socket Primer puerto para establecer la conexión (0-65535).
      * @param request Slot por el que enviar las solicitudes.
+     * @param response Slot por el que enviar las respuestas.
      * @throws Exception Si se produce algún error al crear los puertos internos.
      */
-    public SolicitorPort(String host, int socket, Slot request) throws Exception	{
+    public SolicitorPort(String host, int socket, Slot request, Slot response) throws Exception	{
 	this.host = host;
 	this.outSocket = socket;
 	this.inSocket = socket+1;
 	this.in = request;
+        this.out = response;
 	this.reqPort = new ExitPort(this.host, outSocket, in);
-	this.respPort = new EntryPort(inSocket);
+	this.respPort = new EntryPort(inSocket, out);
 	this.outThread = new Thread(reqPort);
 	this.inThread = new Thread(respPort);
-	this.out = respPort.getExitSlot();
         this.uuid = UUID.randomUUID();
-    }
-    
-    /**
-     * Devuelve el slot por el que salen las respuestas.
-     * @return Slot por el que llegan las respuestas.
-     */
-    public Slot getExitSlot()	{
-	return out;
     }
     
     /**

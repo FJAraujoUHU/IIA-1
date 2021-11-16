@@ -13,15 +13,15 @@ public class CIDSetter extends Task {
     private long id;
 
     /**
-     * Constructor de un Content ID Setter estándar. Las IDs que va asignando
-     * son secuenciales a partir de un número basado en el UUID de la tarea, ya
-     * que se genera de manera aleatoria.
+     * Constructor de un Content ID Setter estándar.Las IDs que va asignando son
+     * secuenciales a partir de un número basado en el UUID de la tarea, ya que
+     * se genera de manera aleatoria.
      *
      * @param input Slot de entrada.
-     * @throws Exception Si se produce un error al crear los Slots de salida.
+     * @param output Slot de salida
      */
-    public CIDSetter(Slot input) throws Exception {
-        super(new Slot[]{input}, 1);
+    public CIDSetter(Slot input, Slot output) {
+        super(new Slot[]{input}, new Slot[]{output});
         this.id = uuid.getMostSignificantBits() ^ uuid.getLeastSignificantBits();   //XOR para obfuscar el número
     }
 
@@ -30,11 +30,11 @@ public class CIDSetter extends Task {
      * son secuenciales a partir del número especificado.
      *
      * @param input Slot de entrada.
+     * @param output Slot de salida.
      * @param id ID inicial.
-     * @throws Exception Si se produce un error al crear los Slots de salida.
      */
-    public CIDSetter(Slot input, long id) throws Exception {
-        super(new Slot[]{input}, 1);
+    public CIDSetter(Slot input, Slot output, long id) {
+        super(new Slot[]{input}, new Slot[]{output});
         this.id = id;
     }
 
@@ -70,5 +70,4 @@ public class CIDSetter extends Task {
             System.out.println(ex.toString());
         }
     }
-
 }

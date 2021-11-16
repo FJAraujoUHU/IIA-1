@@ -52,11 +52,11 @@ public class Merger extends Task {
     /**
      * Constructor de un Merger estándar.
      *
-     * @param input Slots de entrada.
-     * @throws Exception Si se produce un error al crear los Slots de salida.
+     * @param input Slots de entrada.     
+     * @param output Slot de salida.
      */
-    public Merger(Slot[] input) throws Exception {
-        super(input, 1);
+    public Merger(Slot[] input, Slot output) {
+        super(input, new Slot[]{output});
         readers = new MergerWorker[input.length];
         readerThreads = new Thread[readers.length];
         for (int i = 0; i < input.length; i++) {
