@@ -14,39 +14,6 @@ import tasks.Task;
  */
 public class PuertoTester {
 
-    //Tarea genérica de un slot de entrada y otro de salida, que añade un "!" a lo que le entra y lo reenvía.
-    private static class TareaEjemplo extends Task {
-
-	public TareaEjemplo(Slot entrada) throws Exception {
-	    super(new Slot[]{entrada}, 1);
-	}
-
-	@Override
-	public void run() {
-	    Message m;
-	    String contenido;
-
-	    do {					    //ejecutarse hasta recibir la orden de apagado/se cierre un slot
-		try {
-		    m = receive(0);			    //La tarea se queda esperando a que le llegue un mensaje por el primer slot
-		    contenido = m.toString();		    //Guarda el contenido en una string
-		    m.setMessage(contenido + "!");	   //Añade un carácter al mensaje
-		    send(m, 0);			    //Reenvía el mensaje por el primer slot
-		} catch (Exception ex) {
-		    System.out.println(ex.toString());	    //si hay algún error, mostrarlo por pantalla y seguir ejecutando
-		    contenido = Message.SHUTDOWN;
-
-		}
-	    } while (!contenido.equals(Message.SHUTDOWN) && in[0].available() && out[0].available());
-
-	    try {
-		close();
-	    } catch (Exception ex) {
-		System.out.println(ex.toString());
-	    }
-	}
-    }
-
     /**
      * Main para probar el funcionamiento de puertos, implementar según
      * necesidad

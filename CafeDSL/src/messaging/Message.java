@@ -1,6 +1,7 @@
 package messaging;
 
 import java.io.Serializable;
+import java.util.Objects;
 import java.util.Random;
 import java.util.UUID;
 
@@ -25,7 +26,8 @@ public class Message implements Serializable {
     /**
      * Orden/mensaje que el sistema entiende como orden de apagado.
      */
-    public static final String SHUTDOWN = "!!!SYSTEM SHUTDOWN!!!";
+    public static final String SHUTDOWN_STR = "!!!SYSTEM SHUTDOWN!!!";
+    public static final Message SHUTDOWN = new Message(SHUTDOWN_STR);
 
     /**
      * Constructor de la clase.
@@ -123,6 +125,31 @@ public class Message implements Serializable {
     public String toString()	{
 	return message;
     }
-    
+
+    @Override
+    public int hashCode() {
+        int hash = 3;
+        hash = 83 * hash + Objects.hashCode(this.message);
+        hash = 83 * hash + Objects.hashCode(this.uuid);
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final Message other = (Message) obj;
+        if (!Objects.equals(this.message, other.message)) {
+            return false;
+        }
+        return Objects.equals(this.uuid, other.uuid);
+    }
     
 }

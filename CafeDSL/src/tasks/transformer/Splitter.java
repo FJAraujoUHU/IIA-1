@@ -33,7 +33,7 @@ public class Splitter extends Task {
     }
 
     /**
-     * WIP Funcionamiento de la tarea.
+     * Funcionamiento de la tarea.
      */
     @Override
     public void run() {
@@ -44,7 +44,7 @@ public class Splitter extends Task {
             try {
                 m = receive(0);                                                 //La tarea se queda esperando a que le llegue un mensaje por el primer slot
                 contenido = m.toString();                                       //Guarda el contenido en una string
-                if (!contenido.equals(Message.SHUTDOWN)) {
+                if (!m.equals(Message.SHUTDOWN)) {
                     //Se ejecuta el bucle mientras siga encontrando la etiqueta
                     while (contenido.contains("<" + tag + ">") && contenido.contains("</" + tag + ">")) {
                         String subarbol = contenido.substring(contenido.indexOf("<" + tag + ">"), contenido.indexOf("</" + tag + ">") + 8);
@@ -55,9 +55,9 @@ public class Splitter extends Task {
                 }
             } catch (Exception ex) {
                 System.out.println(ex.toString());
-                contenido = Message.SHUTDOWN;
+                m = Message.SHUTDOWN;
             }
-        } while (!contenido.equals(Message.SHUTDOWN) && this.flow());
+        } while (!m.equals(Message.SHUTDOWN) && this.flow());
 
         try {
             close();

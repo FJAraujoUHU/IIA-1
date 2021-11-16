@@ -64,10 +64,12 @@ public class Mensajero {
 		ObjectOutputStream oos = new ObjectOutputStream(os);
 
 		input = "";
-		while (!input.equals(Message.SHUTDOWN)) {
+                Message m;
+		while (!input.equals("-1")) {
 		    input = sc.nextLine();
-		    if (input.equals("-1")) input = Message.SHUTDOWN;
-		    Message m = new Message(input);
+		    if (input.equals("-1"))
+                        m = Message.SHUTDOWN;
+                    else m = new Message(input);
 		    System.out.println("Enviando \"" + m + "\", ID=" + m.getInternalID() + "...");
 		    oos.writeObject(m);
 		}
@@ -105,13 +107,11 @@ public class Mensajero {
 		ObjectInputStream ois = new ObjectInputStream(is);
 		
 		Message m;
-		while (!input.equals(Message.SHUTDOWN) && !socket.isClosed()) {
-		    m = (Message) ois.readObject();
+                do {
+                    m = (Message) ois.readObject();
 		    System.out.println("Mensaje de " + socket.getInetAddress().getCanonicalHostName() + ":" + socket.getPort() + " ID=" + m.getInternalID() + ":");
 		    System.out.println(m);
-		    input = m.toString();
-		}
-		
+                } while (!m.equals(Message.SHUTDOWN) && !socket.isClosed());
 
 		System.out.println("Cerrando conexión y saliendo...");
 		ss.close();

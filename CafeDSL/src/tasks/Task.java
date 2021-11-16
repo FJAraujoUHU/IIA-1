@@ -137,7 +137,6 @@ public abstract class Task implements Runnable {
 	for (Slot output : out) {
 	    try {
                 if (output.available()) {
-                    output.send(new Message(Message.SHUTDOWN));
                     output.close();
                 }
 	    } catch (Exception ex) {
