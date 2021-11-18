@@ -1,7 +1,8 @@
 -Usar XPath y XSLT para configurar las tareas para sacar más de un 5.
--Las tareas NO se encargan de crear Slots.
 -Las tareas NO se encargar de compilar los XPath.
--Las tareas solo se encargan de leer de slots, hacer algo con los mensajes y escribir en las salidas.
 -Arreglar la propagación de las excepciones.
 -Usar un monitor para gestionar la sincronizacion de los lectores de slots
 -Reescribir el cerrado de las tareas.
+
+-SPLITTER: Guardar la cabecera del mensaje para que el agregator pueda recomponerla.
+-Añadir ya XPath y BBDD

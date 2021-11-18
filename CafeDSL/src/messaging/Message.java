@@ -82,14 +82,11 @@ public class Message implements Serializable {
     }
     
     /**
-     * Devuelve el Correlation ID del mensaje.
+     * Devuelve el Correlation ID del mensaje. (Si no tiene, devuelve NULL)
      * @return Correlation ID del mensaje.
-     * @throws Exception Si el mensaje no tenía Correlation ID.
      */
-    public long getId() throws Exception {
-	if (publicID == null)
-	    throw new Exception("No se ha asignado ningún ID");
-	else return publicID;
+    public Long getId() {
+	return publicID;
     }
     
     /**

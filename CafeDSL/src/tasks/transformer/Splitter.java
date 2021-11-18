@@ -4,7 +4,7 @@ import messaging.*;
 import tasks.Task;
 
 /**
- * Tarea Splitter.
+ * Tarea Splitter. HACE FALTA REDISEÑAR PARA QUE USE XPATH
  *
  * Va buscando la etiqueta que se le especifica, y va mandando mensajes cada vez
  * que encuentra dicha etiqueta con el subárbol de dicha etiqueta.
