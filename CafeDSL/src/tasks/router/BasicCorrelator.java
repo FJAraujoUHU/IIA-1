@@ -4,7 +4,7 @@ import java.util.Iterator;
 import messaging.*;
 
 /**
- *
+ * ESTA CLASE ES UNA PATATA; REDISEÑAR
  * @author Francisco Javier Araujo Mendoza
  */
 public class BasicCorrelator extends Correlator {

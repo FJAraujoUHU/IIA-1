@@ -8,7 +8,7 @@ import messaging.*;
 import tasks.Task;
 
 /**
- *
+ * Retocar
  * @author Francisco Javier Araujo Mendoza
  */
 public abstract class Correlator extends Task {

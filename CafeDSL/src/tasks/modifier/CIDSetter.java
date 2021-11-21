@@ -58,16 +58,12 @@ public class CIDSetter extends Task {
                     send(m, 0);                                                 //Envía el mensaje
                 }
 
-            } catch (Exception ex) {
+            } catch (SlotException ex) {
                 System.out.println(ex.toString());
                 m = Message.SHUTDOWN;
             }
         } while (!m.equals(Message.SHUTDOWN) && this.flow());
 
-        try {
-            close();
-        } catch (Exception ex) {
-            System.out.println(ex.toString());
-        }
+        this.close();
     }
 }

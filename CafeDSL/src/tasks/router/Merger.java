@@ -22,26 +22,23 @@ public class Merger extends Task {
         @Override
         public void run() {
             Message m;
-            while (in.available() && out.available()) {                         //Ejecutarse mientras la entrada siga abierta
+            do {                                                                //ejecutarse hasta recibir la orden de apagado/se cierre un slot
                 try {
                     m = in.receive();
-                    if (m.equals(Message.SHUTDOWN)) {                           //Si es un mensaje de apagado, forzar el cierre por si acaso
-                        in.close();
+                    if (!m.equals(Message.SHUTDOWN)) {
+                        synchronized (out) {out.send(m);}
                     }
-                    synchronized (out) {
-                        out.send(m);                                            //Reenviar el mensaje por la salida
-                    }
-                } catch (Exception ex) {
-                    if (!ex.getMessage().contains("Slot already closed"));
-                        System.out.println(ex.toString());
+                } catch (SlotException ex) {                              //Si uno de los slots está cerrado
+                    m = Message.SHUTDOWN;
                 }
-            }
-            try {
-                if (out.available()) {
-                    out.close();
+            } while (!m.equals(Message.SHUTDOWN) && in.available() && out.available());
+
+            if (in.available()) {                                               //Cierra la entrada si sigue abierta
+                try {
+                    in.close();
+                } catch (SlotException ex) {
+                    //No hacer nada, no debería llegar.
                 }
-            } catch (Exception ex) {
-                System.out.println(ex.toString());
             }
         }
     }
@@ -52,7 +49,7 @@ public class Merger extends Task {
     /**
      * Constructor de un Merger estándar.
      *
-     * @param input Slots de entrada.     
+     * @param input Slots de entrada.
      * @param output Slot de salida.
      */
     public Merger(Slot[] input, Slot output) {
@@ -79,7 +76,7 @@ public class Merger extends Task {
                 t.join();
             }
             this.close();
-        } catch (Exception ex) {
+        } catch (InterruptedException ex) {
             System.out.println(ex.toString());
         }
     }

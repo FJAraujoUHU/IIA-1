@@ -3,6 +3,7 @@ package tasks;
 import java.util.UUID;
 import messaging.Message;
 import messaging.Slot;
+import messaging.SlotException;
 
 /**
  * Tarea genérica sobre la que se basan el resto de tareas. También proporciona
@@ -41,15 +42,15 @@ public abstract class Task implements Runnable {
      *
      * @param m Mensaje a enviar.
      * @param slot Puerto destino.
-     * @throws Exception Si hay problemas con el slot o se ha introducido un
-     * índice inválido.
+     * @throws IndexOutOfBoundsException Si se ha introducido un índice inválido.
+     * @throws messaging.SlotException Si el Slot indicado estaba cerrado.
      */
-    protected void send(Message m, int slot) throws Exception {
+    protected void send(Message m, int slot) throws IndexOutOfBoundsException, SlotException {
 	try {
 	    out[slot].send(m);
 	} catch (IndexOutOfBoundsException ex) {
-	    Exception e = new Exception("Index out of bounds :" + slot + "out of " + out.length);
-	    e.addSuppressed(ex);
+            //Para dar más info sobre el error
+            IndexOutOfBoundsException e = new IndexOutOfBoundsException("Index out of bounds :" + slot + "out of " + out.length);
 	    throw e;
 	}
     }
@@ -59,16 +60,15 @@ public abstract class Task implements Runnable {
      *
      * @param slot Puerto a escuchar.
      * @return Un mensaje.
-     * @throws Exception Si hay problemas con el slot o se ha introducido un
-     * índice inválido.
+     * @throws IndexOutOfBoundsException Si se ha introducido un índice inválido.
+     * @throws messaging.SlotException Si el Slot indicado estaba cerrado.
      */
-    protected Message receive(int slot) throws Exception {
+    protected Message receive(int slot) throws IndexOutOfBoundsException, SlotException {
 	try {
-	    Message ret = in[slot].receive();
-	    return ret;
+	    return in[slot].receive();
 	} catch (IndexOutOfBoundsException ex) {
-	    Exception e = new Exception("Index out of bounds :" + slot + "out of " + in.length);
-	    e.addSuppressed(ex);
+            //Para dar más info sobre el error
+	    IndexOutOfBoundsException e = new IndexOutOfBoundsException("Index out of bounds :" + slot + "out of " + out.length);
 	    throw e;
 	}
     }
@@ -102,17 +102,24 @@ public abstract class Task implements Runnable {
     /**
      * Cierra la tarea e intenta propagar un mensaje de apagado a sus vecinos.
      *
-     * @throws Exception Si se produce algún error que no sea intentar cerrar un Slot previamente cerrado.
      */
-    public void close() throws Exception {
+    public void close() {
+        for (Slot input : in) {
+            try {
+                if (input.available()) {
+                    input.close();
+                }
+	    } catch (SlotException ex) {
+                //Si el slot realmente estaba cerrado, ignorar
+	    }
+        }
 	for (Slot output : out) {
 	    try {
                 if (output.available()) {
-                    output.close();
+                    output.send(Message.SHUTDOWN);
                 }
-	    } catch (Exception ex) {
-		if (!ex.getMessage().toUpperCase().contains("CLOSED"))
-		    throw ex;
+	    } catch (SlotException ex) {
+                //Si el slot realmente estaba cerrado, ignorar
 	    }
 	}
     }
@@ -122,12 +129,11 @@ public abstract class Task implements Runnable {
      * @return True si todas están abiertas, False si alguna está cerrada.
      */
     public boolean flow()   {
-        boolean ret = true;
         for (Slot input : in)
-            ret = ret && input.available();
+            if (!input.available()) return false;
         for (Slot output : out)
-            ret = ret && output.available();
-        return ret;
+            if (!output.available()) return false;
+        return true;
     }
 
     /**

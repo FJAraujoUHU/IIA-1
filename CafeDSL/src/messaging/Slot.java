@@ -31,9 +31,9 @@ public class Slot {
      * Constructor de la clase. Inicia los flujos y la tubería para dejarlos
      * listos para usar.
      *
-     * @throws Exception Si se produce algún error al establecer la tubería.
+     * @throws SlotException Si se produce algún error al establecer la tubería.
      */
-    public Slot() throws Exception {
+    public Slot() throws SlotException {
         uuid = UUID.randomUUID();
         try {
             //Es importante el orden de creación de los streams.
@@ -45,23 +45,23 @@ public class Slot {
             open = true;
         } catch (IOException ex) {
             open = false;
-            Exception e = new Exception("Error creating slot/stream (UUID = " + uuid + ")");
-            e.addSuppressed(e);
-            throw e;
+            throw new SlotException("Error creating slot/stream (UUID = " + uuid + ")", ex);
         }
     }
 
     /**
      * Lee el primer mensaje que le llega, y si no hay ninguno, espera hasta que
      * llegue.
+     * 
+     * Si el mensaje es un mensaje de cierre, cierra el slot automáticamente.
      *
      * @return Un mensaje.
-     * @throws Exception Si el Slot no está operativo, o se produce algún error
-     * de conexión en la espera.
+     * @throws SlotException Si el Slot no está operativo, o se produce
+     * algún error de conexión en la espera.
      */
-    public Message receive() throws Exception {
+    public Message receive() throws SlotException {
         if (!open) {
-            throw new Exception("Slot is closed. (UUID = " + uuid + ")");
+            throw new SlotException("Slot is closed. (UUID = " + uuid + ")");
         }
         try {
             Message m = (Message) dest.readObject();
@@ -71,9 +71,7 @@ public class Slot {
             return m;
         } catch (Exception ex) {
             this.close();
-            Exception e = new Exception("Error reading slot (UUID = " + uuid + ")");
-            e.addSuppressed(ex);
-            throw e;
+            throw new SlotException("Error reading slot (UUID = " + uuid + ")", ex);
         }
     }
 
@@ -81,32 +79,33 @@ public class Slot {
      * Envía un mensaje a través del Slot.
      *
      * @param m Mensaje a enviar.
-     * @throws Exception Si el Slot no está operativo, o se produce un error al
+     * @throws SlotException Si el Slot no está operativo, o se produce un error al
      * enviar.
      */
-    public void send(Message m) throws Exception {
+    public void send(Message m) throws SlotException {
         if (!open) {
-            throw new Exception("Slot is closed. (UUID = " + uuid + ")");
+            throw new SlotException("Slot is closed. (UUID = " + uuid + ")");
         }
         try {
             orig.writeObject(m);
-        } catch (Exception ex) {
+        } catch (IOException ex) {
             this.close();
-            Exception e = new Exception("Error writing to slot. (UUID = " + uuid + ")");
-            e.addSuppressed(ex);
-            throw e;
+            throw new SlotException("Error writing to slot. (UUID = " + uuid + ")", ex);
         }
     }
 
     /**
-     * Termina de enviar los mensajes, y cierra la conexión.
+     * Intenta terminar de enviar los mensajes, y cierra la conexión. Sólo usar
+     * para forzar el cierre de un Slot, puesto que los Slots se cierran sólos
+     * al sacar un mensaje de cierre; o si se pretende cerrar el slot desde el
+     * lado del receptor.
      *
-     * @throws Exception Si se intenta cerrar un Slot previamente cerrado, o se
+     * @throws SlotException Si se intenta cerrar un Slot previamente cerrado, o se
      * produce un error inesperado.
      */
-    public void close() throws Exception {
+    public void close() throws SlotException {
         if (!open) {
-            throw new Exception("Slot already closed. (UUID = " + uuid + ")");
+            throw new SlotException("Slot is closed. (UUID = " + uuid + ")");
         }
         try {
             orig.writeObject(Message.SHUTDOWN);
@@ -115,13 +114,15 @@ public class Slot {
             open = false;
             orig.close();
             origPipe.close();
-        } catch (Exception ex) {
+        } catch (IOException ex) {
             open = false;
-            if (!ex.getMessage().contains("Pipe closed")) {	//Si el error no es porque ya estuviese cerrado
+            throw new SlotException("Error closing slot. (UUID = " + uuid + ")", ex);
+            
+            /*if (!ex.getMessage().contains("Pipe closed")) {	//Si el error no es porque ya estuviese cerrado
                 Exception e = new Exception("Error closing slot. (UUID = " + uuid + ")");
                 e.addSuppressed(ex);
                 throw e;
-            }
+            }*/
         }
     }
 

@@ -15,9 +15,8 @@ public class Replicator extends Task {
      *
      * @param input Slot de entrada.
      * @param outputs Salidas de la tarea.
-     * @throws Exception Si se produce un error al crear los Slots de salida.
      */
-    public Replicator(Slot input, Slot[] outputs) throws Exception {
+    public Replicator(Slot input, Slot[] outputs) {
         super(new Slot[]{input}, outputs);
     }
 
@@ -31,20 +30,16 @@ public class Replicator extends Task {
             try {
                 m = receive(0);                                                 //La tarea se queda esperando a que le llegue un mensaje por el primer slot
                 if (!m.equals(Message.SHUTDOWN)) {
-                    for (Slot output : out) {                                       //Reenvía el mensaje
-                        output.send(new Message(m));                                //Envía un nuevo clon del mensaje original.
+                    for (Slot output : out) {                                   //Reenvía el mensaje
+                        output.send(new Message(m));                            //Envía un nuevo clon del mensaje original.
                     }
                 }
-            } catch (Exception ex) {
+            } catch (SlotException ex) {
                 System.out.println(ex.toString());
                 m = Message.SHUTDOWN;
             }
         } while (!m.equals(Message.SHUTDOWN) && this.flow());
 
-        try {
-            close();
-        } catch (Exception ex) {
-            System.out.println(ex.toString());
-        }
+        close();
     }
 }

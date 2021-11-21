@@ -7,6 +7,7 @@ import java.net.Socket;
 import java.util.UUID;
 import messaging.Message;
 import messaging.Slot;
+import messaging.SlotException;
 
 /**
  *
@@ -55,46 +56,56 @@ public class ExitPort implements Runnable {
             } while (!m.equals(Message.SHUTDOWN) && !socket.isClosed() && enabled);
                     
 	    oos.flush();
-	} catch (Exception ex) {
+	} catch (IOException | SlotException ex) {
 	    if (enabled) {
 		System.out.println(ex); //si el error no ha sido al cerrarse
 	    }
 	} finally {
 	    enabled = false;
 	    try {
-		cerrar();
-	    } catch (Exception ex) {
-		if (!ex.getMessage().contains("closed")) {
-		    System.out.println(ex);
-		}
-	    }
+		close();
+	    } catch (PortException ex) {
+                /*No hacer nada, ya estaba cerrado*/
+            } catch (IOException ex) {
+                System.out.println(ex);
+            }
 	}
     }
 
     /**
-     * Termina de enviar los mensajes, y cierra la conexión.
+     * Cierra la conexión forzadamente.
      *
-     * @throws Exception Si se produce un error inesperado.
+     * @throws PortException Si el puerto ya estaba cerrado.
+     * @throws java.io.IOException Si se produce algún error cerrando los sockets.
      */
-    public void cerrar() throws Exception {
+    public void close() throws PortException, IOException {
 	if (!enabled) {
-	    throw new Exception("Port already closed.");
-	}
-	enabled = false;
-	try {
-	    if (socket != null) {
-		if (!socket.isClosed()) {
-		    socket.close();
-		}
-	    }
-	    if (slot.available()) {
-		slot.close();
-	    }
-	} catch (IOException ex) {
-	    Exception e = new Exception("Error closing port (UUID = " + uuid + ")");
-	    e.addSuppressed(ex);
-	    throw e;
-	}
+            throw new PortException("Port already closed (UUID = " + uuid + ")");
+        }
+        enabled = false;
+        try {
+            if (socket != null) {
+                if (!socket.isClosed()) {
+                    socket.close();
+                }
+            }
+            if (slot.available()) {
+                try {
+                    slot.close();
+                } catch (SlotException ex) {
+                    /*Nunca debería lanzarse porque se comprueba primero si está abierto*/
+                }
+            }
+        } catch (IOException ex) {
+            if (slot.available()) {
+                try {
+                    slot.close();
+                } catch (SlotException e) {
+                    /*Nunca debería lanzarse porque se comprueba primero si está abierto*/
+                }
+            }
+            throw ex;
+        }
     }
 
     /**
