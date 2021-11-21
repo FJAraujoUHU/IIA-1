@@ -8,7 +8,7 @@ import messaging.*;
 import tasks.Task;
 
 /**
- * Retocar
+ * Definición genérica de un Correlator
  * @author Francisco Javier Araujo Mendoza
  */
 public abstract class Correlator extends Task {
@@ -31,13 +31,15 @@ public abstract class Correlator extends Task {
             while (in.available()) {
                 try {
                     m = in.receive();                                           //La tarea se queda esperando a que le llegue un mensaje por el primer slot
-                    if (m.equals(Message.SHUTDOWN)) parent.close();
+                    if (m.equals(Message.SHUTDOWN)) {
+                        parent.close();
+                    }
                     synchronized (parent) {
                         out.add(m);
                         parent.notifyAll();
                     }
-                } catch (Exception ex) {
-                    System.out.println(ex.toString());
+                } catch (SlotException ex) {
+                    parent.close();
                 }
             }
         }
@@ -84,7 +86,7 @@ public abstract class Correlator extends Task {
         }
         return -1;
     }
-    /**
-     * * Implementar método Run según el tiipo de correlator **
+    /*
+     * Implementar método Run según el tiipo de correlator
      */
 }

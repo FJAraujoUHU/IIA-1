@@ -4,7 +4,7 @@ import java.util.Iterator;
 import messaging.*;
 
 /**
- * ESTA CLASE ES UNA PATATA; REDISEÑAR
+ * Correlator que funciona a base de CIDs
  * @author Francisco Javier Araujo Mendoza
  */
 public class BasicCorrelator extends Correlator {
@@ -46,18 +46,12 @@ public class BasicCorrelator extends Correlator {
                         }
                     }
                 }
-            } while (flow());
-            
-            close();
-              
-        } catch (Exception ex) {
+            } while (flow());              
+        } catch (SlotException ex) {
+            //Salir
+        } catch (InterruptedException ex) {
             System.out.println(ex.toString());
         }
-
-        try {
-            close();
-        } catch (Exception ex) {
-            System.out.println(ex.toString());
-        }
+        close();
     }
 }

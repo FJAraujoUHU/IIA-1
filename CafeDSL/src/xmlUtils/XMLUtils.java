@@ -2,6 +2,8 @@ package xmlUtils;
 
 import java.io.ByteArrayInputStream;
 import java.io.StringWriter;
+import java.util.ArrayList;
+import java.util.List;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
@@ -14,7 +16,9 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 /**
- * Herramientas para trabajar entre elementos DOM (para uso con XPath) y Strings.
+ * Herramientas para trabajar entre elementos DOM (para uso con XPath) y
+ * Strings.
+ *
  * @author Francisco Javier Araujo Mendoza
  */
 public class XMLUtils {
@@ -25,7 +29,7 @@ public class XMLUtils {
         StringWriter writer = new StringWriter();
         StreamResult result = new StreamResult(writer);
         xtrans.transform(new DOMSource(n), result);
-        return result.toString();
+        return writer.toString();
     }
 
     public static String nodeListToString(NodeList nl) throws TransformerException {
@@ -38,7 +42,22 @@ public class XMLUtils {
             Node n = nl.item(i);
             xtrans.transform(new DOMSource(n), result);
         }
-        return result.toString();
+        return writer.toString();
+    }
+
+    public static List<String> nodeListToStringList(NodeList nl) throws TransformerException {
+        Transformer xtrans = TransformerFactory.newInstance().newTransformer();
+        xtrans.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
+        List<String> ret = new ArrayList<>();
+        
+        for (int i = 0; i < nl.getLength(); i++) {
+            Node n = nl.item(i);
+            StringWriter writer = new StringWriter();
+            StreamResult result = new StreamResult(writer);
+            xtrans.transform(new DOMSource(n), result);
+            ret.add(writer.toString());
+        }
+        return ret;
     }
 
     public static Document stringToDocument(String str) throws Exception {

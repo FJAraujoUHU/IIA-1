@@ -1,35 +1,33 @@
 package tasks.transformer;
 
+import java.util.List;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathExpression;
 import messaging.*;
+import org.w3c.dom.Document;
+import org.w3c.dom.NodeList;
 import tasks.Task;
+import xmlUtils.XMLUtils;
 
 /**
- * Tarea Splitter. HACE FALTA REDISEÑAR PARA QUE USE XPATH
- *
- * Va buscando la etiqueta que se le especifica, y va mandando mensajes cada vez
- * que encuentra dicha etiqueta con el subárbol de dicha etiqueta.
+ * Tarea Splitter.
  *
  * @author Francisco Javier Araujo Mendoza
  */
 public class Splitter extends Task {
 
-    private final String tag;
+    private final XPathExpression xpath;
 
     /**
      * Constructor de un Splitter estándar.
      *
      * @param input Slot de entrada.
      * @param output Slot de salida.
-     * @param tag Etiqueta sobre la que hacer los splits.
+     * @param xpath Expresión para hacer la división
      */
-    public Splitter(Slot input, Slot output, String tag) {
+    public Splitter(Slot input, Slot output, XPathExpression xpath) {
         super(new Slot[]{input}, new Slot[]{output});
-        if (tag.startsWith("<") && tag.endsWith(">")) {
-            //Si se ha pasado en formato XML, quitar las marcas
-            this.tag = tag.substring(1, tag.length() - 1);
-        } else {
-            this.tag = tag;
-        }
+        this.xpath = xpath;
     }
 
     /**
@@ -38,31 +36,30 @@ public class Splitter extends Task {
     @Override
     public void run() {
         Message m;
-        String contenido;
-
         do {                                                                    //ejecutarse hasta recibir la orden de apagado/se cierre un slot
             try {
-                m = receive(0);                                                 //La tarea se queda esperando a que le llegue un mensaje por el primer slot
-                contenido = m.toString();                                       //Guarda el contenido en una string
+                m = receive(0);                                                 //La tarea se queda esperando a que le llegue un mensaje
+
                 if (!m.equals(Message.SHUTDOWN)) {
-                    //Se ejecuta el bucle mientras siga encontrando la etiqueta
-                    while (contenido.contains("<" + tag + ">") && contenido.contains("</" + tag + ">")) {
-                        String subarbol = contenido.substring(contenido.indexOf("<" + tag + ">"), contenido.indexOf("</" + tag + ">") + 8);
-                        send(new Message(subarbol, m), 0);
-                        //Va consumiendo el mensaje
-                        contenido = contenido.substring(contenido.indexOf("</" + tag + ">") + 8);
+                    Document mensajeDoc = XMLUtils.stringToDocument(m.toString());
+                    //Ejecuta la expresión
+                    NodeList itemList = (NodeList) xpath.evaluate(mensajeDoc, XPathConstants.NODESET);
+                    //Convierte el resultado en una lista de Strings
+                    List<String> list = XMLUtils.nodeListToStringList(itemList);
+                    //Convierte cada String en mensaje y lo envía
+                    for (String s : list) {
+                        send(new Message(s,m) ,0);
                     }
                 }
+            } catch (SlotException ex) {
+                //Si se cierra algún slot
+                m = Message.SHUTDOWN;
             } catch (Exception ex) {
                 System.out.println(ex.toString());
                 m = Message.SHUTDOWN;
             }
         } while (!m.equals(Message.SHUTDOWN) && this.flow());
 
-        try {
-            close();
-        } catch (Exception ex) {
-            System.out.println(ex.toString());
-        }
+        this.close();
     }
 }
