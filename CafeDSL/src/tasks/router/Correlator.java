@@ -17,29 +17,35 @@ public abstract class Correlator extends Task {
 
         private final Slot in;
         private final List<Message> out;
-        private final Task parent;
+        private final Correlator parent;
+        private boolean alive;
 
-        public SlotReader(Slot slot, List<Message> buf, Task parent) {
+        public SlotReader(Slot slot, List<Message> buf, Correlator parent) {
             this.in = slot;
             this.out = buf;
             this.parent = parent;
+            alive = true;
+        }
+        
+        public void stop()  {
+            alive = false;
         }
 
         @Override
         public void run() {
             Message m;
-            while (in.available()) {
+            while (in.available() && alive) {
                 try {
                     m = in.receive();                                           //La tarea se queda esperando a que le llegue un mensaje por el primer slot
                     if (m.equals(Message.SHUTDOWN)) {
-                        parent.close();
+                        alive = false;
                     }
                     synchronized (parent) {
                         out.add(m);
                         parent.notifyAll();
                     }
                 } catch (SlotException ex) {
-                    parent.close();
+                    alive = false;
                 }
             }
         }
@@ -69,6 +75,9 @@ public abstract class Correlator extends Task {
 
     protected boolean joinAll(long timeoutMilis) {
         try {
+            for (SlotReader s : workers) {
+                s.stop();
+            }
             for (Thread thr : workerThreads) {
                 thr.join(timeoutMilis);
             }

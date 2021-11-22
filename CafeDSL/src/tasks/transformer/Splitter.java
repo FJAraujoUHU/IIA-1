@@ -1,6 +1,8 @@
 package tasks.transformer;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpression;
 import messaging.*;
@@ -10,6 +12,8 @@ import tasks.Task;
 import xmlUtils.XMLUtils;
 
 /**
+ * FALTA GUARDAR LA CABECERA, USAR XSLT
+ * 
  * Tarea Splitter.
  *
  * @author Francisco Javier Araujo Mendoza
@@ -17,6 +21,8 @@ import xmlUtils.XMLUtils;
 public class Splitter extends Task {
 
     private final XPathExpression xpath;
+    
+    private final Map<Long, Message> headerStorage;
 
     /**
      * Constructor de un Splitter estándar.
@@ -28,6 +34,8 @@ public class Splitter extends Task {
     public Splitter(Slot input, Slot output, XPathExpression xpath) {
         super(new Slot[]{input}, new Slot[]{output});
         this.xpath = xpath;
+        headerStorage = new HashMap<>();
+        
     }
 
     /**

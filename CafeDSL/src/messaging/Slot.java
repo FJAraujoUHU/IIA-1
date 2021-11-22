@@ -6,6 +6,12 @@ import java.io.ObjectOutputStream;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+import java.util.function.Supplier;
 
 /**
  * Clase que representa a los slots que comunican a las distintas tareas del
@@ -52,12 +58,12 @@ public class Slot {
     /**
      * Lee el primer mensaje que le llega, y si no hay ninguno, espera hasta que
      * llegue.
-     * 
+     *
      * Si el mensaje es un mensaje de cierre, cierra el slot automáticamente.
      *
      * @return Un mensaje.
-     * @throws SlotException Si el Slot no está operativo, o se produce
-     * algún error de conexión en la espera.
+     * @throws SlotException Si el Slot no está operativo, o se produce algún
+     * error de conexión en la espera.
      */
     public Message receive() throws SlotException {
         if (!open) {
@@ -69,18 +75,54 @@ public class Slot {
                 this.close();
             }
             return m;
-        } catch (Exception ex) {
+        } catch (IOException | ClassNotFoundException | SlotException ex) {
             this.close();
             throw new SlotException("Error reading slot (UUID = " + uuid + ")", ex);
         }
     }
 
     /**
+     * Lee el primer mensaje que le llega, y si no hay ninguno, intenta esperar
+     * hasta que llegue o se acabe el tiempo de espera especificado.Si el mensaje es un mensaje de cierre, cierra el slot automáticamente.
+     *
+     *
+     * @param timeout Tiempo límite de espera (en mseg)
+     * @return Un mensaje.
+     * @throws SlotException Si el Slot no está operativo, o se produce algún
+     * error de conexión en la espera.
+     * @throws java.util.concurrent.TimeoutException Si no ha dado tiempo a leer el mensaje.
+     */
+    public Message receive(long timeout) throws SlotException, TimeoutException {
+        if (!open) {
+            throw new SlotException("Slot is closed. (UUID = " + uuid + ")");
+        }
+        try {
+            Supplier<Message> supplier = () -> {
+                try {
+                    return (Message) dest.readObject();
+                } catch (IOException | ClassNotFoundException ex) {
+                    return null;
+                }
+            };
+            Future<Message> future = CompletableFuture.supplyAsync(supplier);
+            Message m = future.get(timeout, TimeUnit.MILLISECONDS);
+            if (m.equals(Message.SHUTDOWN)) {
+                this.close();
+            }
+            return m;
+        } catch (SlotException | InterruptedException | ExecutionException ex) {
+            this.close();
+            throw new SlotException("Error reading slot (UUID = " + uuid + ")", ex);
+        }
+
+    }
+
+    /**
      * Envía un mensaje a través del Slot.
      *
      * @param m Mensaje a enviar.
-     * @throws SlotException Si el Slot no está operativo, o se produce un error al
-     * enviar.
+     * @throws SlotException Si el Slot no está operativo, o se produce un error
+     * al enviar.
      */
     public void send(Message m) throws SlotException {
         if (!open) {
@@ -100,8 +142,8 @@ public class Slot {
      * al sacar un mensaje de cierre; o si se pretende cerrar el slot desde el
      * lado del receptor.
      *
-     * @throws SlotException Si se intenta cerrar un Slot previamente cerrado, o se
-     * produce un error inesperado.
+     * @throws SlotException Si se intenta cerrar un Slot previamente cerrado, o
+     * se produce un error inesperado.
      */
     public void close() throws SlotException {
         if (!open) {
@@ -117,7 +159,7 @@ public class Slot {
         } catch (IOException ex) {
             open = false;
             throw new SlotException("Error closing slot. (UUID = " + uuid + ")", ex);
-            
+
             /*if (!ex.getMessage().contains("Pipe closed")) {	//Si el error no es porque ya estuviese cerrado
                 Exception e = new Exception("Error closing slot. (UUID = " + uuid + ")");
                 e.addSuppressed(ex);

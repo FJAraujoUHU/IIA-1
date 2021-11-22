@@ -138,8 +138,8 @@ public class Message implements Serializable {
     }
 
     /**
-     * Compara dos mensajes. Si se pretende comparar el contenido del mensaje,
-     * usar otros métodos.
+     * Compara dos mensajes a través de metadatos. Si se pretende comparar el
+     * contenido del mensaje, usar otros métodos.
      *
      * @param obj Mensaje con el que comparar
      * @return Si hacen referencia al mismo mensaje, o si tienen el mismo UUID.
@@ -158,6 +158,9 @@ public class Message implements Serializable {
         final Message other = (Message) obj;
         if (!Objects.equals(this.message, other.message)) {
             return false;
+        }
+        if (this.toString().equals(SHUTDOWN_STR) && other.toString().equals(SHUTDOWN_STR)) {
+            return true;
         }
         return Objects.equals(this.uuid, other.uuid);
     }

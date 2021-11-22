@@ -61,11 +61,28 @@ public class XMLUtils {
     }
 
     public static Document stringToDocument(String str) throws Exception {
-
         return DocumentBuilderFactory
                 .newInstance()
                 .newDocumentBuilder()
                 .parse(new ByteArrayInputStream(str.getBytes()));
-
+    }
+    
+    public static boolean compareNodeList(NodeList list1, NodeList list2) {
+        if (list1 == list2) {
+            return true;
+        }
+        if (list1 == null || list2 == null) {
+            return false;
+        }
+        if (list1.getLength() != list2.getLength()) {
+            return false;
+        }
+        for (int i = 0; i < list1.getLength(); i++) {
+            Node n1 = list1.item(i);
+            Node n2 = list2.item(i);
+            if (!n1.isEqualNode(n2))
+                return false;    
+        }
+        return true;
     }
 }

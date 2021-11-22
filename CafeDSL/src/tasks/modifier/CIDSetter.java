@@ -59,7 +59,6 @@ public class CIDSetter extends Task {
                 }
 
             } catch (SlotException ex) {
-                System.out.println(ex.toString());
                 m = Message.SHUTDOWN;
             }
         } while (!m.equals(Message.SHUTDOWN) && this.flow());

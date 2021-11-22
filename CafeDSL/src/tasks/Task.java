@@ -101,7 +101,6 @@ public abstract class Task implements Runnable {
 
     /**
      * Cierra la tarea e intenta propagar un mensaje de apagado a sus vecinos.
-     *
      */
     public void close() {
         for (Slot input : in) {
