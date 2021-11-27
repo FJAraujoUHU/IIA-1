@@ -36,6 +36,18 @@ public abstract class Task implements Runnable {
 	this.out = outputs;
         this.uuid = UUID.randomUUID();
     }
+    
+    /**
+     * Constructor para la creación de tareas.
+     * 
+     * @param input Slot de entrada a la tarea.
+     * @param output Slot de salida a la tarea.
+     */
+    public Task(Slot input, Slot output) {
+	this.in = new Slot[]{input};
+	this.out = new Slot[]{output};
+        this.uuid = UUID.randomUUID();
+    }
 
     /**
      * Envía un mensaje por el puerto especificado.
