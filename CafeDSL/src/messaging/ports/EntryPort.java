@@ -54,7 +54,7 @@ public class EntryPort implements Runnable {
             do {
                 m = (Message) ois.readObject();
                 slot.send(m);
-            } while (!m.equals(Message.SHUTDOWN) && !socket.isClosed() && enabled);
+            } while (slot.availableWrite() && !socket.isClosed() && enabled);
 
         } catch (IOException | ClassNotFoundException | SlotException ex) {
             if (enabled) {
@@ -94,17 +94,17 @@ public class EntryPort implements Runnable {
                     ss.close();
                 }
             }
-            if (slot.available()) {
+            if (slot.availableWrite()) {
                 try {
-                    slot.send(Message.SHUTDOWN);
+                    slot.close();
                 } catch (SlotException ex) {
                     /*Nunca debería lanzarse porque se comprueba primero si está abierto*/
                 }
             }
         } catch (IOException ex) {
-            if (slot.available()) {
+            if (slot.availableWrite()) {
                 try {
-                    slot.send(Message.SHUTDOWN);
+                    slot.close();
                 } catch (SlotException e) {
                     /*Nunca debería lanzarse porque se comprueba primero si está abierto*/
                 }

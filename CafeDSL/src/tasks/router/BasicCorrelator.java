@@ -49,7 +49,7 @@ public class BasicCorrelator extends Correlator {
                         }
                     }
                 }
-            } while (flow());
+            } while (this.flow());
         } catch (SlotException ex) {
             //Salir
         } catch (InterruptedException ex) {

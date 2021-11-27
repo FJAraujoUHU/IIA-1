@@ -34,7 +34,7 @@ public abstract class Correlator extends Task {
         @Override
         public void run() {
             Message m;
-            while (in.available() && alive) {
+            while (in.availableRead() && alive) {
                 try {
                     m = in.receive();                                           //La tarea se queda esperando a que le llegue un mensaje por el primer slot
                     if (m.equals(Message.SHUTDOWN)) {

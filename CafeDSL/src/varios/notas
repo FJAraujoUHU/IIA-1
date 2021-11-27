@@ -1,5 +1,17 @@
 -Usar XPath y XSLT para configurar las tareas para sacar más de un 5.
 
--SPLITTER: Guardar la cabecera del mensaje para que el agregator pueda recomponerla.
+-SPLITTER: Guardar la cabecera del mensaje para que el agregator pueda recomponerla. (Usa XSLT)
+    -Guardar la cabecera como una nueva clase, con la cabecera como un XSLT con un for-each y un atributo que sea el num de elementos que espera.
+    <xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+	<xsl:template match="/">
+		<CABECERA>
+			</LOQSEA>
+			<xsl:for-each select="/inputs/*">
+				<xsl:copy-of select="."/>
+			</xsl:for-each>
+		</CABECERA>
+	</xsl:template>
+    </xsl:stylesheet>
 -Añadir ya XPath y BBDD
 -Cargar config de un fichero (?)
+-Volver a reescribir el cierre de slots usando un contador de cola de mensajes?

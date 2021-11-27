@@ -104,18 +104,12 @@ public abstract class Task implements Runnable {
      */
     public void close() {
         for (Slot input : in) {
-            try {
-                if (input.available()) {
-                    input.close();
-                }
-	    } catch (SlotException ex) {
-                //Si el slot realmente estaba cerrado, ignorar
-	    }
+            input.finallyClose();
         }
 	for (Slot output : out) {
 	    try {
-                if (output.available()) {
-                    output.send(Message.SHUTDOWN);
+                if (output.availableWrite()) {
+                    output.close();
                 }
 	    } catch (SlotException ex) {
                 //Si el slot realmente estaba cerrado, ignorar
@@ -129,9 +123,9 @@ public abstract class Task implements Runnable {
      */
     public boolean flow()   {
         for (Slot input : in)
-            if (!input.available()) return false;
+            if (!input.availableRead()) return false;
         for (Slot output : out)
-            if (!output.available()) return false;
+            if (!output.availableWrite()) return false;
         return true;
     }
 

@@ -22,7 +22,7 @@ public class Splitter extends Task {
 
     private final XPathExpression xpath;
     
-    private final Map<Long, Message> headerStorage;
+    private final Map<Long, String> headerStorage;
 
     /**
      * Constructor de un Splitter estándar.
@@ -49,6 +49,7 @@ public class Splitter extends Task {
                 m = receive(0);                                                 //La tarea se queda esperando a que le llegue un mensaje
 
                 if (!m.equals(Message.SHUTDOWN)) {
+                    headerStorage.put(m.getInternalID(), m.toString());         //Almacenar mensaje original/cabecera
                     Document mensajeDoc = XMLUtils.stringToDocument(m.toString());
                     //Ejecuta la expresión
                     NodeList itemList = (NodeList) xpath.evaluate(mensajeDoc, XPathConstants.NODESET);
@@ -60,13 +61,11 @@ public class Splitter extends Task {
                     }
                 }
             } catch (SlotException ex) {
-                //Si se cierra algún slot
-                m = Message.SHUTDOWN;
+                //Si se lanza la excepción, sale del bucle sólo
             } catch (Exception ex) {
                 System.out.println(ex.toString());
-                m = Message.SHUTDOWN;
             }
-        } while (!m.equals(Message.SHUTDOWN) && this.flow());
+        } while (this.flow());
 
         this.close();
     }

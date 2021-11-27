@@ -31,14 +31,10 @@ public class Merger extends Task {
                 } catch (SlotException ex) {                              //Si uno de los slots está cerrado
                     m = Message.SHUTDOWN;
                 }
-            } while (!m.equals(Message.SHUTDOWN) && in.available() && out.available());
+            } while (in.availableRead() && out.availableWrite());
 
-            if (in.available()) {                                               //Cierra la entrada si sigue abierta
-                try {
-                    in.close();
-                } catch (SlotException ex) {
-                    //No hacer nada, no debería llegar.
-                }
+            if (in.availableRead()) {                                               //Cierra la entrada si sigue abierta
+                in.finallyClose();
             }
         }
     }

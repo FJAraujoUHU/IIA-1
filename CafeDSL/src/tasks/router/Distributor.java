@@ -51,10 +51,9 @@ public class Distributor extends Task {
                     }
                 }
             } catch (SlotException ex) {
-                System.out.println(ex.toString());
-                m = Message.SHUTDOWN;
+                //Si se lanza la excepción, sale del bucle sólo
             }
-        } while (!m.equals(Message.SHUTDOWN) && this.flow());
+        } while (this.flow());
 
         close();
     }

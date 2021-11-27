@@ -127,10 +127,45 @@ public class SlotTest {
      * Test of close method, of class Slot.
      */
     @Test
-    public void testClose() throws SlotException {
+    public void testCloseWrite() throws SlotException {
         System.out.println("close");
+        assertTrue("Slot is closed, can't test", instance.availableWrite());
         Boolean exceptionTriggered = false;
         instance.close();
+        
+        try {
+            instance.send(new Message("Hello world!"));
+        } catch (SlotException ex) {
+            //Debe bloquearlo
+            exceptionTriggered = true;
+        }
+
+        assertTrue(exceptionTriggered && !instance.availableWrite());
+    }
+    
+    /**
+     * Test of close method, of class Slot.
+     */
+    @Test
+    public void testCloseRead() throws SlotException {
+        System.out.println("close");
+        Boolean exceptionTriggered = false;
+        instance.send(new Message("Hello world!"));
+        instance.close();
+        
+        try {
+            instance.receive();
+        } catch (SlotException ex) {
+            fail("Slot has closed its output");
+        }
+        
+        try {
+            instance.receive();
+            fail("Slot hasn't closed its output");
+        } catch (SlotException ex) {
+            
+        }
+        
         
         try {
             instance.send(new Message("Hello world!"));
@@ -149,8 +184,10 @@ public class SlotTest {
     public void testAvailable() throws SlotException {
         System.out.println("available");
         
-        assertTrue(instance.available());
+        instance.send(new Message("Hello world!"));
+        assertTrue(instance.availableWrite());
         instance.close();
-        assertFalse(instance.available());
+        assertFalse(instance.availableWrite());
+        assertTrue(instance.availableRead());
     }
 }

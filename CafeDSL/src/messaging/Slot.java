@@ -11,6 +11,8 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 
 /**
@@ -30,7 +32,8 @@ public class Slot {
     private PipedOutputStream origPipe;
     private ObjectInputStream dest;
     private ObjectOutputStream orig;
-    private volatile boolean open;
+    private AtomicBoolean open;
+    private AtomicInteger queue;
     private final UUID uuid;
 
     /**
@@ -48,9 +51,10 @@ public class Slot {
             origPipe = new PipedOutputStream(destPipe);
             orig = new ObjectOutputStream(origPipe);
             dest = new ObjectInputStream(destPipe);
-            open = true;
+            queue = new AtomicInteger(0);
+            open = new AtomicBoolean(true);
         } catch (IOException ex) {
-            open = false;
+            open = new AtomicBoolean(false);
             throw new SlotException("Error creating slot/stream (UUID = " + uuid + ")", ex);
         }
     }
@@ -66,16 +70,17 @@ public class Slot {
      * error de conexión en la espera.
      */
     public Message receive() throws SlotException {
-        if (!open) {
+        if (!open.get() && queue.get() < 1) {
             throw new SlotException("Slot is closed. (UUID = " + uuid + ")");
         }
         try {
             Message m = (Message) dest.readObject();
-            if (m.equals(Message.SHUTDOWN)) {
-                this.close();
+            queue.decrementAndGet();
+            if (!open.get() && queue.get() < 1) {
+                this.finallyClose();
             }
             return m;
-        } catch (IOException | ClassNotFoundException | SlotException ex) {
+        } catch (IOException | ClassNotFoundException ex) {
             this.close();
             throw new SlotException("Error reading slot (UUID = " + uuid + ")", ex);
         }
@@ -93,7 +98,7 @@ public class Slot {
      * @throws java.util.concurrent.TimeoutException Si no ha dado tiempo a leer el mensaje.
      */
     public Message receive(long timeout) throws SlotException, TimeoutException {
-        if (!open) {
+        if (!open.get() && queue.get() < 1) {
             throw new SlotException("Slot is closed. (UUID = " + uuid + ")");
         }
         try {
@@ -106,11 +111,12 @@ public class Slot {
             };
             Future<Message> future = CompletableFuture.supplyAsync(supplier);
             Message m = future.get(timeout, TimeUnit.MILLISECONDS);
-            if (m.equals(Message.SHUTDOWN)) {
-                this.close();
+            queue.decrementAndGet();
+            if (!open.get() && queue.get() < 1) {
+                this.finallyClose();
             }
             return m;
-        } catch (SlotException | InterruptedException | ExecutionException ex) {
+        } catch (InterruptedException | ExecutionException ex) {
             this.close();
             throw new SlotException("Error reading slot (UUID = " + uuid + ")", ex);
         }
@@ -125,11 +131,16 @@ public class Slot {
      * al enviar.
      */
     public void send(Message m) throws SlotException {
-        if (!open) {
+        if (!open.get()) {
             throw new SlotException("Slot is closed. (UUID = " + uuid + ")");
         }
         try {
-            orig.writeObject(m);
+            if (m.equals(Message.SHUTDOWN))
+                this.close();
+            else {
+                orig.writeObject(m);
+                queue.incrementAndGet();
+            }
         } catch (IOException ex) {
             this.close();
             throw new SlotException("Error writing to slot. (UUID = " + uuid + ")", ex);
@@ -137,34 +148,37 @@ public class Slot {
     }
 
     /**
-     * Intenta terminar de enviar los mensajes, y cierra la conexión. Sólo usar
-     * para forzar el cierre de un Slot, puesto que los Slots se cierran sólos
-     * al sacar un mensaje de cierre; o si se pretende cerrar el slot desde el
-     * lado del receptor.
+     * Cierra el Slot, de forma que no permite que le lleguen nuevos mensajes,
+     * pero permite usar la salida hasta que no queden más mensajes.
      *
      * @throws SlotException Si se intenta cerrar un Slot previamente cerrado, o
      * se produce un error inesperado.
      */
     public void close() throws SlotException {
-        if (!open) {
+        if (!open.get()) {
             throw new SlotException("Slot is closed. (UUID = " + uuid + ")");
         }
         try {
             orig.writeObject(Message.SHUTDOWN);
             orig.flush();
             origPipe.flush();
-            open = false;
+            open.set(false);
+        } catch (IOException ex) {
+            open.set(false);
+            throw new SlotException("Error closing slot. (UUID = " + uuid + ")", ex);
+        }
+    }
+    
+    /**
+     * Cierra definitivamente el Slot.
+     */
+    public void finallyClose() {
+        try {
+            open.set(false);
             orig.close();
             origPipe.close();
         } catch (IOException ex) {
-            open = false;
-            throw new SlotException("Error closing slot. (UUID = " + uuid + ")", ex);
-
-            /*if (!ex.getMessage().contains("Pipe closed")) {	//Si el error no es porque ya estuviese cerrado
-                Exception e = new Exception("Error closing slot. (UUID = " + uuid + ")");
-                e.addSuppressed(ex);
-                throw e;
-            }*/
+            open.set(false);
         }
     }
 
@@ -173,9 +187,17 @@ public class Slot {
      *
      * @return Si el slot es funcional.
      */
-    public boolean available() {
-        return open;
+    public boolean availableRead() {
+        if (open.get())
+            return true;
+        else return (queue.get() > 0);
     }
+    
+    public boolean availableWrite() {
+        return open.get();
+    }
+    
+    
 
     /**
      * Devuelve el UUID único del slot (es intransferible)

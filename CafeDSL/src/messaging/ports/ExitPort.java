@@ -53,7 +53,7 @@ public class ExitPort implements Runnable {
             do {
                 m = slot.receive();
 		oos.writeObject(m);
-            } while (!m.equals(Message.SHUTDOWN) && !socket.isClosed() && enabled);
+            } while (slot.availableRead() && !socket.isClosed() && enabled);
                     
 	    oos.flush();
 	} catch (IOException | SlotException ex) {
@@ -89,21 +89,9 @@ public class ExitPort implements Runnable {
                     socket.close();
                 }
             }
-            if (slot.available()) {
-                try {
-                    slot.close();
-                } catch (SlotException ex) {
-                    /*Nunca debería lanzarse porque se comprueba primero si está abierto*/
-                }
-            }
+            slot.finallyClose();
         } catch (IOException ex) {
-            if (slot.available()) {
-                try {
-                    slot.close();
-                } catch (SlotException e) {
-                    /*Nunca debería lanzarse porque se comprueba primero si está abierto*/
-                }
-            }
+            slot.finallyClose();
             throw ex;
         }
     }

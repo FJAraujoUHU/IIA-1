@@ -40,9 +40,9 @@ public class Filter extends Task {
                     }
                 }
             } catch (Exception ex) {
-                m = Message.SHUTDOWN;
+                //Si se lanza la excepción, sale del bucle sólo
             }
-        } while (!m.equals(Message.SHUTDOWN) && this.flow());
+        } while (this.flow());
 
         close();
     }

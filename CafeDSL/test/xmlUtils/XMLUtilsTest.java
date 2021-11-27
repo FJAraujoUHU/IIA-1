@@ -41,62 +41,6 @@ public class XMLUtilsTest {
     }
 
     /**
-     * Test of nodeToString method, of class XMLUtils.
-     */
-    @Test
-    public void testNodeToString() throws Exception {
-        System.out.println("nodeToString");
-        Node n = null;
-        String expResult = "";
-        String result = XMLUtils.nodeToString(n);
-        assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
-    }
-
-    /**
-     * Test of nodeListToString method, of class XMLUtils.
-     */
-    @Test
-    public void testNodeListToString() throws Exception {
-        System.out.println("nodeListToString");
-        NodeList nl = null;
-        String expResult = "";
-        String result = XMLUtils.nodeListToString(nl);
-        assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
-    }
-
-    /**
-     * Test of nodeListToStringList method, of class XMLUtils.
-     */
-    @Test
-    public void testNodeListToStringList() throws Exception {
-        System.out.println("nodeListToStringList");
-        NodeList nl = null;
-        List<String> expResult = null;
-        List<String> result = XMLUtils.nodeListToStringList(nl);
-        assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
-    }
-
-    /**
-     * Test of stringToDocument method, of class XMLUtils.
-     */
-    @Test
-    public void testStringToDocument() throws Exception {
-        System.out.println("stringToDocument");
-        String str = "";
-        Document expResult = null;
-        Document result = XMLUtils.stringToDocument(str);
-        assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
-    }
-
-    /**
      * Test of compareNodeList method, of class XMLUtils.
      */
     @Test

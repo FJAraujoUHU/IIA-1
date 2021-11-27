@@ -59,9 +59,9 @@ public class CIDSetter extends Task {
                 }
 
             } catch (SlotException ex) {
-                m = Message.SHUTDOWN;
+                //Si se lanza la excepción, sale del bucle sólo
             }
-        } while (!m.equals(Message.SHUTDOWN) && this.flow());
+        } while (this.flow());
 
         this.close();
     }

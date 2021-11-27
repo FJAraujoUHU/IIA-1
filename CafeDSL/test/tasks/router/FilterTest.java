@@ -81,7 +81,7 @@ public class FilterTest {
         Message m;
         Boolean didHotArrive = false;
         
-        while (out.available()) {
+        while (out.availableRead()) {
             m = out.receive();
             if (m.equals(hot))
                 didHotArrive = true;

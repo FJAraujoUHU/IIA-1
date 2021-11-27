@@ -41,9 +41,8 @@ public class TaskTest {
                     }
 
                 } catch (SlotException ex) {
-                    m = Message.SHUTDOWN;
                 }
-            } while (!m.equals(Message.SHUTDOWN) && this.flow());
+            } while (this.flow());
 
             this.close();
         }
@@ -85,14 +84,16 @@ public class TaskTest {
      * Test of close method, of class Task.
      */
     @Test
-    public void testClose() throws InterruptedException {
+    public void testClose() throws InterruptedException, SlotException {
         System.out.println("close");
         assertTrue("Task should have all slots open, but some aren't functioning", instance.flow());
+        in.send(new Message("A real task would send something"));
+        Thread.sleep(2500);
         instance.close();
         instanceThr.join(10000);
         assertFalse("Task should have slots closed, but all slots are still open", instance.flow());
-        assertFalse("Input slot should be closed, but it's open", in.available());
-        assertTrue("Output slot should have been left open, but it's closed", out.available());
+        assertFalse("Input slot should be closed, but it's open", in.availableWrite());
+        assertTrue("Output slot should have been left open, but it's closed", out.availableRead());
     }
 
     /**
@@ -117,15 +118,24 @@ public class TaskTest {
         instanceThr.start();
         String msg = "Hello world!";
         Message m = new Message(msg);
+        
+        
 
         in.send(m);
         m = out.receive();
         String result = m.toString();
         String expResult = msg + TaskImpl.ADDED;
         assertEquals("Output message doesn't match expectations", expResult, result);
-
+        
+        
+        System.out.println(instance.flow());
+        
+        System.out.println(in.availableRead());
+        System.out.println(in.availableWrite());
+        System.out.println(out.availableRead());
+        System.out.println(out.availableWrite());
         assertTrue("The task has closed its ports prematurely", instance.flow());
-        in.send(Message.SHUTDOWN);
+        instance.close();
         instanceThr.join(10000);
         assertFalse("The task has failed to close automatically", instance.flow());
     }
