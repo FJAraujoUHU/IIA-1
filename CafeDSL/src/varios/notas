@@ -12,6 +12,12 @@
 		</CABECERA>
 	</xsl:template>
     </xsl:stylesheet>
+
+
+
 -Añadir ya XPath y BBDD
 -Cargar config de un fichero (?)
--Volver a reescribir el cierre de slots usando un contador de cola de mensajes?
+
+
+
+-Como se realiza el content enricher? usar una transformacion? como se delimita dicha transformacion???
