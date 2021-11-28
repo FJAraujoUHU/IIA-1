@@ -44,6 +44,7 @@ public class FilterTest {
         out = new Slot();
         instance = new Filter(in, out, xpath);
         instanceThr = new Thread(instance);
+        instanceThr.start();
     }
     
     @After
@@ -57,7 +58,6 @@ public class FilterTest {
     public void testRunShutdown() throws SlotException, InterruptedException, TimeoutException {
         System.out.println("shutdown");
 
-        instanceThr.start();
         in.send(Message.SHUTDOWN);
         instanceThr.join(10000);
         assertFalse("The task has failed to close automatically", instance.flow());
@@ -70,7 +70,6 @@ public class FilterTest {
     public void testRun() throws SlotException, InterruptedException {
         System.out.println("run");
 
-        instanceThr.start();
         Message hot = new Message(HOTEXAMPLE);
         Message cold = new Message(COLDEXAMPLE);
         
@@ -83,9 +82,9 @@ public class FilterTest {
         
         while (out.availableRead()) {
             m = out.receive();
-            if (m.equals(hot))
+            if (m.equalContent(hot))
                 didHotArrive = true;
-            if (m.equals(cold))
+            if (m.equalContent(cold))
                 fail("Filter has allowed a blocked message");
         }
         assertTrue("Filter has blocked a message", didHotArrive);

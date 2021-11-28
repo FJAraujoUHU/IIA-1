@@ -37,7 +37,7 @@ public abstract class Correlator extends Task {
             while (in.availableRead() && alive) {
                 try {
                     m = in.receive();                                           //La tarea se queda esperando a que le llegue un mensaje por el primer slot
-                    if (m.equals(Message.SHUTDOWN)) {
+                    if (m.isShutdown()) {
                         alive = false;
                     }
                     synchronized (parent) {
@@ -96,6 +96,6 @@ public abstract class Correlator extends Task {
         return -1;
     }
     /*
-     * Implementar método Run según el tiipo de correlator
+     * Implementar método Run según el tipo de correlator
      */
 }

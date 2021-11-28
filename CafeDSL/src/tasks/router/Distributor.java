@@ -38,12 +38,12 @@ public class Distributor extends Task {
         do {                                                                    //ejecutarse hasta recibir la orden de apagado/se cierre un slot
             try {
                 m = receive(0);                                                 //La tarea se queda esperando a que le llegue un mensaje por el primer slot
-                if (!m.equals(Message.SHUTDOWN)) {
+                if (!m.isShutdown()) {
                     try {
                         Document messageAsDoc = XMLUtils.stringToDocument(m.toString());
                         for (int i = 0; i < out.length; i++) {
                             if ((Boolean) conditions[i].evaluate(messageAsDoc, XPathConstants.BOOLEAN)) {
-                                out[i].send(new Message(m));
+                                out[i].send(new Message(m.toString(), m));      //Envía hijos idénticos al mensaje, para permitir mutaciones.
                             }
                         }
                     } catch (Exception ex) {

@@ -49,6 +49,7 @@ public class BasicCorrelatorTest {
         out2 = new Slot();
         instance = new BasicCorrelator(new Slot[]{in1, in2}, new Slot[]{out1, out2});
         instanceThr = new Thread(instance);
+        instanceThr.start();
         System.gc();
     }
 
@@ -62,8 +63,6 @@ public class BasicCorrelatorTest {
     @Test
     public void testRun() throws SlotException, InterruptedException {
         System.out.println("run");
-
-        instanceThr.start();
         Message hot1 = new Message(HOTEXAMPLE1);
         hot1.setId(1);
         Message hot2 = new Message(HOTEXAMPLE2);

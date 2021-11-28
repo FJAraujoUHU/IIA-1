@@ -70,7 +70,7 @@ public class Mensajero {
 		    if (input.equals("-1"))
                         m = Message.SHUTDOWN;
                     else m = new Message(input);
-		    System.out.println("Enviando \"" + m + "\", ID=" + m.getInternalID() + "...");
+		    System.out.println("Enviando \"" + m + "\", ID=" + m.getInternalId().toString() + "...");
 		    oos.writeObject(m);
 		}
 		System.out.println("Cerrando puerto y saliendo...");
@@ -109,9 +109,9 @@ public class Mensajero {
 		Message m;
                 do {
                     m = (Message) ois.readObject();
-		    System.out.println("Mensaje de " + socket.getInetAddress().getCanonicalHostName() + ":" + socket.getPort() + " ID=" + m.getInternalID() + ":");
+		    System.out.println("Mensaje de " + socket.getInetAddress().getCanonicalHostName() + ":" + socket.getPort() + " ID=" + m.getInternalId().toString() + ":");
 		    System.out.println(m);
-                } while (!m.equals(Message.SHUTDOWN) && !socket.isClosed());
+                } while (!m.isShutdown() && !socket.isClosed());
 
 		System.out.println("Cerrando conexión y saliendo...");
 		ss.close();

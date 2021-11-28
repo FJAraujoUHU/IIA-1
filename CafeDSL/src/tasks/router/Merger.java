@@ -25,11 +25,11 @@ public class Merger extends Task {
             do {                                                                //ejecutarse hasta recibir la orden de apagado/se cierre un slot
                 try {
                     m = in.receive();
-                    if (!m.equals(Message.SHUTDOWN)) {
+                    if (!m.isShutdown()) {
                         synchronized (out) {out.send(m);}
                     }
-                } catch (SlotException ex) {                              //Si uno de los slots está cerrado
-                    m = Message.SHUTDOWN;
+                } catch (SlotException ex) {
+                    //Ignorar, el bucle abortará
                 }
             } while (in.availableRead() && out.availableWrite());
 

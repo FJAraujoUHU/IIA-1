@@ -50,6 +50,7 @@ public class XPathCorrelatorTest {
         out2 = new Slot();
         instance = new XPathCorrelator(new Slot[]{in1,in2}, new Slot[]{out1,out2}, xpath);
         instanceThr = new Thread(instance);
+        instanceThr.start();
         System.gc();
     }
     
@@ -64,7 +65,7 @@ public class XPathCorrelatorTest {
     public void testRun() throws SlotException, InterruptedException {
         System.out.println("run");
 
-        instanceThr.start();
+        
         Message hot1 = new Message(HOTEXAMPLE1);
         Message hot2 = new Message(HOTEXAMPLE2);
         
@@ -80,8 +81,8 @@ public class XPathCorrelatorTest {
         
         
         Message m;
-        assertEquals("Hasn't correlated", out1.receive().equals(hot1), out2.receive().equals(hot2));
-        assertEquals("Hasn't correlated", out1.receive().equals(cold1), out2.receive().equals(cold2));
+        assertEquals("Hasn't correlated", out1.receive().equalContent(hot1), out2.receive().equalContent(hot2));
+        assertEquals("Hasn't correlated", out1.receive().equalContent(cold1), out2.receive().equalContent(cold2));
         
         in1.send(Message.SHUTDOWN);
         

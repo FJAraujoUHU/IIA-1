@@ -135,7 +135,7 @@ public class Slot {
             throw new SlotException("Slot is closed. (UUID = " + uuid + ")");
         }
         try {
-            if (m.equals(Message.SHUTDOWN))
+            if (m.isShutdown())
                 this.close();
             else {
                 orig.writeObject(m);

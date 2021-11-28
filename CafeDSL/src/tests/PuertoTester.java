@@ -3,7 +3,6 @@ package tests;
 import messaging.ports.SolicitorPort;
 import messaging.Message;
 import messaging.Slot;
-import tasks.Task;
 
 /**
  * Tester de puertos, usar junto Mensajero.java (Para ejecutar, Shift+F6) ESTA

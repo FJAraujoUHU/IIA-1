@@ -36,22 +36,22 @@ public class Transformer extends Task {
 
     @Override
     public void run() {
-        Message msgIn, msgOut;
+        Message m;
         do {                                                                    //ejecutarse hasta recibir la orden de apagado/se cierre un slot
             try {
-                msgIn = receive(0);
+                m = receive(0);
 
-                if (!msgIn.equals(Message.SHUTDOWN)) {
+                if (!m.isShutdown()) {
                     //Convierte el mensaje en una entrada para el transformador
-                    Source xmlIn = new StreamSource(new StringReader(msgIn.toString()));
+                    Source xmlIn = new StreamSource(new StringReader(m.toString()));
                     //Prepara la salida para recuperar la transformación
                     StringWriter output = new StringWriter();
                     Result res = new StreamResult(output);
                     //Transforma
                     xslt.transform(xmlIn, res);
                     //Crea un nuevo mensaje hijo con la transformación y lo envía
-                    msgOut = new Message(output.toString(), msgIn);
-                    this.send(msgOut, 0);
+                    m.set(output.toString());
+                    this.send(m, 0);
                 }
 
             } catch (SlotException ex) {

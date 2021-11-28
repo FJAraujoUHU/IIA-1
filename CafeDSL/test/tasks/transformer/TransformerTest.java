@@ -1,13 +1,6 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/UnitTests/JUnit4TestClass.java to edit this template
- */
 package tasks.transformer;
 
 import java.io.StringReader;
-import javax.xml.transform.Source;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamSource;
 import messaging.*;
 import org.junit.After;
@@ -16,8 +9,6 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import static org.junit.Assert.*;
-import org.w3c.dom.Document;
-import xmlUtils.XMLUtils;
 
 /**
  *
@@ -51,6 +42,7 @@ public class TransformerTest {
         
         instance = new Transformer(in, out, new StreamSource(new StringReader(XSLTTEXT)));
         instanceThr = new Thread(instance);
+        instanceThr.start();
     }
     
     @After
@@ -64,13 +56,11 @@ public class TransformerTest {
     public void testRun() throws SlotException, InterruptedException {
         System.out.println("run");
 
-        instanceThr.start();
+        
         Message test = new Message(ITEMEXAMPLE);
         
         in.send(test);
-        //in.send(Message.SHUTDOWN);  //probablemente haga que explote
         assertEquals("Output is different from expectation", EXPECTEDOUTPUT, out.receive().toString());
-        in.send(Message.SHUTDOWN);
         instance.close();
         instanceThr.join(10000);
         assertFalse("The task has failed to close automatically", instance.flow());

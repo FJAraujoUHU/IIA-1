@@ -53,7 +53,7 @@ public class CIDSetter extends Task {
             try {
                 m = receive(0);                                                 //La tarea se queda esperando a que le llegue un mensaje por el primer slot
 
-                if (!m.equals(Message.SHUTDOWN)) {
+                if (!m.isShutdown()) {
                     m.setId(id++);                                              //Cambia el ID del mensaje y postautoincrementa
                     send(m, 0);                                                 //Envía el mensaje
                 }

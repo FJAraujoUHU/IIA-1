@@ -33,7 +33,7 @@ public class Filter extends Task {
         do {
             try {
                 m = receive(0);
-                if (!m.equals(Message.SHUTDOWN)) {
+                if (!m.isShutdown()) {
                     Document mensajeDoc = XMLUtils.stringToDocument(m.toString());
                     if ((Boolean) xpath.evaluate(mensajeDoc, XPathConstants.BOOLEAN)) {
                         send(m, 0);

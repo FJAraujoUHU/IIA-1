@@ -29,9 +29,9 @@ public class Replicator extends Task {
         do {                                                                    //ejecutarse hasta recibir la orden de apagado/se cierre un slot
             try {
                 m = receive(0);                                                 //La tarea se queda esperando a que le llegue un mensaje por el primer slot
-                if (!m.equals(Message.SHUTDOWN)) {
+                if (!m.isShutdown()) {
                     for (Slot output : out) {                                   //Reenvía el mensaje
-                        output.send(new Message(m));                            //Envía un nuevo clon del mensaje original.
+                        output.send(new Message(m.toString(), m));              //Envía hijos idénticos al mensaje, para permitir mutaciones
                     }
                 }
             } catch (SlotException ex) {

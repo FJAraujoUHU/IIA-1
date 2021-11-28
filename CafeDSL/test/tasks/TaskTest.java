@@ -35,8 +35,8 @@ public class TaskTest {
                     m = receive(0);                                                 //La tarea se queda esperando a que le llegue un mensaje por el primer slot
                     contenido = m.toString();
 
-                    if (!m.equals(Message.SHUTDOWN)) {
-                        m.setMessage(contenido + ADDED);                                              //Cambia el ID del mensaje y postautoincrementa
+                    if (!m.isShutdown()) {
+                        m.set(contenido + ADDED);                                              //Cambia el ID del mensaje y postautoincrementa
                         send(m, 0);                                                 //Envía el mensaje
                     }
 
@@ -69,6 +69,7 @@ public class TaskTest {
         out = new Slot();
         instance = new TaskImpl(in, out);
         instanceThr = new Thread(instance);
+        instanceThr.start();
     }
 
     @After
@@ -91,9 +92,13 @@ public class TaskTest {
         Thread.sleep(2500);
         instance.close();
         instanceThr.join(10000);
-        assertFalse("Task should have slots closed, but all slots are still open", instance.flow());
-        assertFalse("Input slot should be closed, but it's open", in.availableWrite());
-        assertTrue("Output slot should have been left open, but it's closed", out.availableRead());
+        Boolean check;
+        check = instance.flow();
+        assertFalse("Task should have slots closed, but all slots are still open", check);
+        check = in.availableWrite();
+        assertFalse("Input slot should be closed, but it's open", check);
+        check =  out.availableRead();
+        assertTrue("Output slot should have been left open, but it's closed", check);
     }
 
     /**
@@ -114,8 +119,7 @@ public class TaskTest {
     @Test
     public void testRun() throws SlotException, InterruptedException {
         System.out.println("run");
-
-        instanceThr.start();
+        
         String msg = "Hello world!";
         Message m = new Message(msg);
         
@@ -126,14 +130,6 @@ public class TaskTest {
         String result = m.toString();
         String expResult = msg + TaskImpl.ADDED;
         assertEquals("Output message doesn't match expectations", expResult, result);
-        
-        
-        System.out.println(instance.flow());
-        
-        System.out.println(in.availableRead());
-        System.out.println(in.availableWrite());
-        System.out.println(out.availableRead());
-        System.out.println(out.availableWrite());
         assertTrue("The task has closed its ports prematurely", instance.flow());
         instance.close();
         instanceThr.join(10000);

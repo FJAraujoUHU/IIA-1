@@ -48,6 +48,7 @@ public class DistributorTest {
         out2 = new Slot();
         instance = new Distributor(in, new Slot[]{out1, out2}, new XPathExpression[]{xpathHot, xpathCold});
         instanceThr = new Thread(instance);
+        instanceThr.start();
     }
     
     @After
@@ -60,8 +61,7 @@ public class DistributorTest {
     @Test
     public void testRun() throws SlotException, InterruptedException {
         System.out.println("run");
-
-        instanceThr.start();
+        
         Message hot = new Message(HOTEXAMPLE);
         Message cold = new Message(COLDEXAMPLE);
         
@@ -69,9 +69,9 @@ public class DistributorTest {
         in.send(cold);
         in.send(Message.SHUTDOWN);
         Message m = out1.receive();
-        assertTrue("Filter has sent cold to hot", m.toString().equals(hot.toString()));
+        assertTrue("Filter has sent cold to hot", m.equalContent(hot));
         m = out2.receive();
-        assertTrue("Filter has sent cold to hot", m.toString().equals(cold.toString()));
+        assertTrue("Filter has sent cold to hot", m.equalContent(cold));
         
         instanceThr.join(10000);
         assertFalse("The task has failed to close automatically", instance.flow());

@@ -37,7 +37,7 @@ public class XPathCorrelator extends Correlator {
                     Iterator<Message> it = channels.get(0).iterator();
                     while (it.hasNext()) {
                         Message m = it.next();
-                        if (!m.equals(Message.SHUTDOWN)) {
+                        if (!m.isShutdown()) {
                             try {
                                 //Extrae los datos que se van a usar como correlación
                                 NodeList correlator = (NodeList) xpath.evaluate(XMLUtils.stringToDocument(m.toString()), XPathConstants.NODESET);
@@ -50,7 +50,7 @@ public class XPathCorrelator extends Correlator {
                                             public boolean test(Message m2) {
                                                 try {
                                                     //Extraer los datos a comparar
-                                                    if (m2.equals(Message.SHUTDOWN)) throw new Exception();
+                                                    if (m2.isShutdown()) throw new Exception();
                                                     NodeList list = (NodeList) xpath.evaluate(XMLUtils.stringToDocument(m2.toString()), XPathConstants.NODESET);
                                                     return XMLUtils.compareNodeList(correlator, list); //coincidan los "correlandos"
                                                 } catch (Exception ex) {
@@ -71,7 +71,7 @@ public class XPathCorrelator extends Correlator {
                                                     @Override
                                                     public boolean test(Message m2) {
                                                         try {
-                                                            if (m2.equals(Message.SHUTDOWN)) throw new Exception();
+                                                            if (m2.isShutdown()) throw new Exception();
                                                             NodeList list = (NodeList) xpath.evaluate(XMLUtils.stringToDocument(m2.toString()), XPathConstants.NODESET);
                                                             return XMLUtils.compareNodeList(correlator, list);
                                                         } catch (Exception ex) {

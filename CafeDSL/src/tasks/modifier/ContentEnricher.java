@@ -26,14 +26,14 @@ public class ContentEnricher extends Task {
                 main = receive(0);
                 enrichment = receive(1);
 
-                if (!main.equals(Message.SHUTDOWN) && !enrichment.equals(Message.SHUTDOWN)) {
+                if (!main.isShutdown() && !enrichment.isShutdown()) {
                     
                     //logica de la tarea
                     
                     
                     
                     
-                    send(output, 0);
+                    //send(output, 0);
                 }
 
             } catch (SlotException ex) {

@@ -3,6 +3,7 @@ package tasks.transformer;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpression;
 import messaging.*;
@@ -22,7 +23,7 @@ public class Splitter extends Task {
 
     private final XPathExpression xpath;
     
-    private final Map<Long, String> headerStorage;
+    private final Map<UUID, String> headerStorage;
 
     /**
      * Constructor de un Splitter estándar.
@@ -48,8 +49,8 @@ public class Splitter extends Task {
             try {
                 m = receive(0);                                                 //La tarea se queda esperando a que le llegue un mensaje
 
-                if (!m.equals(Message.SHUTDOWN)) {
-                    headerStorage.put(m.getInternalID(), m.toString());         //Almacenar mensaje original/cabecera
+                if (!m.isShutdown()) {
+                    headerStorage.put(m.getInternalId(), m.toString());         //Almacenar mensaje original/cabecera
                     Document mensajeDoc = XMLUtils.stringToDocument(m.toString());
                     //Ejecuta la expresión
                     NodeList itemList = (NodeList) xpath.evaluate(mensajeDoc, XPathConstants.NODESET);
