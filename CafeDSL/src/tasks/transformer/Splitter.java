@@ -1,8 +1,12 @@
 package tasks.transformer;
 
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Deque;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
 import java.util.UUID;
 import java.util.regex.Pattern;
 import javax.xml.xpath.XPathConstants;
@@ -11,11 +15,9 @@ import messaging.*;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 import tasks.Task;
-import xmlUtils.XMLUtils;
+import xmlUtils.*;
 
 /**
- * FALTA GUARDAR LA CABECERA, USAR XSLT
- *
  * Tarea Splitter.
  *
  * @author Francisco Javier Araujo Mendoza
@@ -23,8 +25,8 @@ import xmlUtils.XMLUtils;
 public class Splitter extends Task {
 
     private final XPathExpression xpath;
-
-    final Map<UUID, String> headerStorage;
+    final List<SplitterHeader> headers;
+    
     private static final String XSLT_START
             = "<xsl:stylesheet xmlns:xsl=\"http://www.w3.org/1999/XSL/Transform\" version=\"1.0\">"
             + "<xsl:strip-space elements=\"*\"/>"
@@ -32,6 +34,8 @@ public class Splitter extends Task {
     private static final String XSLT_END
             = "</xsl:template>"
             + "</xsl:stylesheet>";
+    public static final String UUID_TAG = "DSL_SPLITTER_UUID";
+    
 
     /**
      * Constructor de un Splitter estándar.
@@ -43,7 +47,7 @@ public class Splitter extends Task {
     public Splitter(Slot input, Slot output, XPathExpression xpath) {
         super(new Slot[]{input}, new Slot[]{output});
         this.xpath = xpath;
-        headerStorage = new HashMap<>();
+        headers = new ArrayList<>();
 
     }
 
@@ -66,14 +70,20 @@ public class Splitter extends Task {
 
                     //Convierte cada String en mensaje y genera la cabecera como XSLT
                     String header = m.toString();
+                    List<UUID> uuids = new ArrayList<>(list.size());
+                    Deque<Message> output = new ArrayDeque<>(list.size());
                     for (String s : list) {
                         Message item = new Message(s, m);
-                        header = header.replaceFirst(Pattern.quote(s), //reemplaza en la cabecera el elemento por una referencia
-                                "<xsl:copy-of select=\"//*[DSL_SPLITTER_UUID='" + item.getInternalId().toString() + "']\"/>");
-                        send(item, 0);
+                        header = header.replaceFirst(Pattern.quote(s),          //reemplaza en la cabecera el elemento por una referencia
+                                "<xsl:copy-of select=\"//*["+ UUID_TAG +"='" + item.getInternalId().toString() + "']\"/>");
+                        uuids.add(item.getInternalId());                        //Apunta la UUID del nuevo mensaje y lo guarda en una lista
+                        output.add(item);
                     }
                     header = XSLT_START + header + XSLT_END;
-                    headerStorage.put(m.getInternalId(), header);
+                    headers.add(new SplitterHeader(uuids, header, m.getInternalId()));
+                    for(Message item : output) {
+                        send(item,0);
+                    }
                 }
             } catch (SlotException ex) {
                 //Si se lanza la excepción, sale del bucle sólo
