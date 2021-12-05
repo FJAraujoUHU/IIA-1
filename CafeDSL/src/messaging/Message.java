@@ -16,21 +16,25 @@ import java.util.UUID;
  * @author Francisco Javier Araujo Mendoza
  */
 public class Message implements Serializable {
-    
+
     private String message;
     private final UUID uuid;
     private final List<Message> ancestors;
     private Long publicID;
-    
+
     /**
      * Orden/mensaje que el sistema entiende como orden de apagado.
      */
-    public static final String SHUTDOWN_STR = "!!!SYSTEM SHUTDOWN!!!";
-    public static final Message SHUTDOWN = new Message(SHUTDOWN_STR);
+    public static Message SHUTDOWN = new Message(null) {
+        @Override
+        public boolean isShutdown() {
+            return true;
+        }
+    };
 
     /**
      * Constructor estándar, para mensajes originales.
-     * 
+     *
      * @param message Contenido del mensaje.
      */
     public Message(String message) {
@@ -39,11 +43,11 @@ public class Message implements Serializable {
         this.ancestors = new ArrayList<>();
         this.publicID = null;
     }
-    
+
     /**
      * Constructor para crear mensajes hijos, pensados para hacer derivados de
      * otro mensaje.
-     * 
+     *
      * @param message Contenido del mensaje.
      * @param parent Padre del mensaje, cuya información queda registrada en el
      * hijo.
@@ -55,7 +59,7 @@ public class Message implements Serializable {
         this.ancestors = new ArrayList<>(parent.ancestors);
         this.ancestors.add(parent);
     }
-    
+
     /**
      * Establece un Correlation ID para el mensaje.
      *
@@ -80,47 +84,49 @@ public class Message implements Serializable {
     public Long getId() {
         return publicID;
     }
-    
+
     /**
      * Devuelve el UUID interno del mensaje, único e inmutable.
-     * 
+     *
      * @return UUID identificativo del objeto.
      */
     public UUID getInternalId() {
         return uuid;
     }
-    
+
     /**
      * Devuelve una lista con todos los ancestros del mensaje, ordenadas de
      * original a más inmediato, siendo el primer índice el mensaje original, y
      * el último, el padre del mensaje.
-     * 
+     *
      * @return Lista de ancestros del mensaje.
      */
     public List<Message> getAncestors() {
         return ancestors;
     }
-    
+
     /**
      * Devuelve el mensaje padre, si es que lo tiene.
-     * 
+     *
      * @return Mensaje padre en el que se basó su creación, NULL si es original.
      */
     public Message getParent() {
-        if (ancestors.isEmpty())
+        if (ancestors.isEmpty()) {
             return null;
-        else return ancestors.get(ancestors.size()-1);
+        } else {
+            return ancestors.get(ancestors.size() - 1);
+        }
     }
-    
+
     /**
      * Devuelve si el mensaje es el mensaje reservado de apagado del sistema.
-     * 
-     * @return True si lo es, False si no.
+     *
+     * @return Si el mensaje es un mensaje de cerrado.
      */
     public boolean isShutdown() {
-        return this.message.equals(SHUTDOWN_STR);
+        return false;
     }
-    
+
     /**
      * Cambia el mensaje que lleva el objeto, sin cambiar ningún metadato.
      *
@@ -139,9 +145,10 @@ public class Message implements Serializable {
     public String toString() {
         return message;
     }
-    
+
     /**
      * Comprueba si el contenido de los mensajes es igual
+     *
      * @param m Mensaje a comparar
      * @return True si son idénticos, False si no.
      */

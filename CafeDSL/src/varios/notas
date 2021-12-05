@@ -4,3 +4,4 @@
 
 
 -Como se realiza el content enricher? usar una transformacion? como se delimita dicha transformacion???
+-Simplemente indicarle mediante XPath lo que quiere añadir y donde añadirlo

@@ -1,8 +1,8 @@
     /--------------/ combinar todos los mensajes en uno
 
 <root>
-<drink><name>te</name><type>hot</type><lolxd>fucc</lolxd></drink>
-<drink><name>cerveza</name><type>cold</type><lolxd>no</lolxd></drink>
+<drink><name>te</name><type>hot</type><METADATA>id1</METADATA></drink>
+<drink><name>cerveza</name><type>cold</type><METADATA>id2</METADATA></drink>
 </root>
 
 /--------------/ insertarlos en la cabecera
@@ -13,8 +13,8 @@
    <xsl:template match="/">
 <cafe_order><order_id>5</order_id><drinks>
 
-<xsl:copy-of select="//*[lolxd='fucc']"/>
-<xsl:copy-of select="//*[lolxd='no']"/>
+<xsl:copy-of select="//*[METADATA='id1']"/>
+<xsl:copy-of select="//*[METADATA='id2']"/>
 
 
 </drinks></cafe_order>
@@ -29,12 +29,12 @@
       <drink>
          <name>te</name>
          <type>hot</type>
-         <lolxd>fucc</lolxd>
+         <METADATA>id1</METADATA>
       </drink>
       <drink>
          <name>cerveza</name>
          <type>cold</type>
-         <lolxd>no</lolxd>
+         <METADATA>id2</METADATA>
       </drink>
    </drinks>
 </cafe_order>
@@ -49,5 +49,5 @@
         <xsl:apply-templates select="@*|node()"/>
     </xsl:copy>
 </xsl:template>
-<xsl:template match="DSL_SPLITTER_UUID"/>
+<xsl:template match="METADATA"/>
 </xsl:stylesheet>
