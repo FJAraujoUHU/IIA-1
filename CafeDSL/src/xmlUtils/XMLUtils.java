@@ -1,20 +1,25 @@
 package xmlUtils;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
 
 /**
  * Herramientas para trabajar entre elementos DOM (para uso con XPath) y
@@ -24,48 +29,68 @@ import org.w3c.dom.NodeList;
  */
 public class XMLUtils {
 
-    public static String nodeToString(Node n) throws TransformerException {
-        Transformer xtrans = TransformerFactory.newInstance().newTransformer();
-        xtrans.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
-        StringWriter writer = new StringWriter();
-        StreamResult result = new StreamResult(writer);
-        xtrans.transform(new DOMSource(n), result);
-        return writer.toString();
-    }
-
-    public static String nodeListToString(NodeList nl) throws TransformerException {
-        Transformer xtrans = TransformerFactory.newInstance().newTransformer();
-        xtrans.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
-        StringWriter writer = new StringWriter();
-        StreamResult result = new StreamResult(writer);
-
-        for (int i = 0; i < nl.getLength(); i++) {
-            Node n = nl.item(i);
-            xtrans.transform(new DOMSource(n), result);
-        }
-        return writer.toString();
-    }
-
-    public static List<String> nodeListToStringList(NodeList nl) throws TransformerException {
-        Transformer xtrans = TransformerFactory.newInstance().newTransformer();
-        xtrans.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
-        List<String> ret = new ArrayList<>();
-        
-        for (int i = 0; i < nl.getLength(); i++) {
-            Node n = nl.item(i);
+    public static String nodeToString(Node n) {
+        try {
+            Transformer xtrans = TransformerFactory.newInstance().newTransformer();
+            xtrans.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
             StringWriter writer = new StringWriter();
             StreamResult result = new StreamResult(writer);
             xtrans.transform(new DOMSource(n), result);
-            ret.add(writer.toString());
+            return writer.toString();
+        } catch (TransformerException ex) {
+            //Si algo falla inesperadamente, devolver null
+            return null;
         }
-        return ret;
     }
 
-    public static Document stringToDocument(String str) throws Exception {
-        return DocumentBuilderFactory
-                .newInstance()
-                .newDocumentBuilder()
-                .parse(new ByteArrayInputStream(str.getBytes()));
+    public static String nodeListToString(NodeList nl) {
+        try {
+            Transformer xtrans = TransformerFactory.newInstance().newTransformer();
+            xtrans.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
+            StringWriter writer = new StringWriter();
+            StreamResult result = new StreamResult(writer);
+            
+            for (int i = 0; i < nl.getLength(); i++) {
+                Node n = nl.item(i);
+                xtrans.transform(new DOMSource(n), result);
+            }
+            return writer.toString();
+        } catch (TransformerException ex) {
+            //Si algo falla inesperadamente, devolver null
+            return null;
+        }
+    }
+
+    public static List<String> nodeListToStringList(NodeList nl) {
+        try {
+            Transformer xtrans = TransformerFactory.newInstance().newTransformer();
+            xtrans.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
+            List<String> ret = new ArrayList<>();
+            
+            for (int i = 0; i < nl.getLength(); i++) {
+                Node n = nl.item(i);
+                StringWriter writer = new StringWriter();
+                StreamResult result = new StreamResult(writer);
+                xtrans.transform(new DOMSource(n), result);
+                ret.add(writer.toString());
+            }
+            return ret;
+        } catch (TransformerException ex) {
+            //Si algo falla inesperadamente, devolver null
+            return null;
+        }
+    }
+
+    public static Document stringToDocument(String str) throws  IOException, SAXException {
+        try {
+            return DocumentBuilderFactory
+                    .newInstance()
+                    .newDocumentBuilder()
+                    .parse(new ByteArrayInputStream(str.getBytes()));
+        } catch (ParserConfigurationException ex) {
+            //No debería pasar nunca, porque no hay ninguna configuración a satisfacer.
+            return null;
+        }
     }
     
     public static boolean compareNodeList(NodeList list1, NodeList list2) {

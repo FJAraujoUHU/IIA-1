@@ -12,6 +12,10 @@ import java.util.UUID;
  * Serializable para poder enviarlo a través de tuberías y puertos para
  * garantizar la máxima modularidad, y Clonable para poder replicarlos
  * fácilmente.
+ * 
+ * Aunque el mensaje tenga un formato XML, debe guardarse internamente como
+ * String para garantizar la serializabilidad de la clase y así permitir la
+ * fácil transmisión entre hilos, procesos y sistemas.
  *
  * @author Francisco Javier Araujo Mendoza
  */
