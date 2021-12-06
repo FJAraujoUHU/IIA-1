@@ -14,7 +14,7 @@ import static org.junit.Assert.*;
  */
 public class SQLSolicitorTest {
     
-    SQLSolicitor instance;
+    SQLSolicitorPort instance;
     Thread instanceThr;
     Slot in, out;
     static String SQLSELECT = "<sql>SELECT * FROM noexiste</sql>";
@@ -37,7 +37,7 @@ public class SQLSolicitorTest {
     public void setUp() throws Exception {
         in = new Slot();
         out = new Slot();
-        instance = new SQLSolicitor(in, out, "b0ve.com", 3306, "cafe-05", "pass", "cafe05", false);
+        instance = new SQLSolicitorPort(in, out, "b0ve.com", 3306, "cafe-05", "pass", "cafe05", false);
         instanceThr = new Thread(instance);
         instanceThr.start();
     }
@@ -53,14 +53,14 @@ public class SQLSolicitorTest {
     public void testClose() throws Exception {
         System.out.println("close");
         boolean commit = false;
-        SQLSolicitor instance = null;
+        SQLSolicitorPort instance = null;
         instance.close(commit);
         // TODO review the generated test code and remove the default call to fail.
         fail("The test case is a prototype.");
     }*/
 
     /**
-     * Test of run method, of class SQLSolicitor.
+     * Test of run method, of class SQLSolicitorPort.
      */
     @Test
     public void testRun() throws Exception {

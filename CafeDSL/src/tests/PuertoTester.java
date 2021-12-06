@@ -24,13 +24,14 @@ public class PuertoTester {
 
 	//test solicitud
 	SolicitorPort ps;
+        Thread psThr;
 	Slot solicitud, respuesta;
 	
 	solicitud = new Slot();
         respuesta = new Slot();
-	ps = new SolicitorPort("localhost", 7777, solicitud, respuesta);
-	
-	ps.start();
+	ps = new SolicitorPort("localhost", 7777, 7778, solicitud, respuesta);
+	psThr = new Thread(ps);
+	psThr.start();
 	for (int i = 0; i < 5; i++) {
 	    solicitud.send(new Message(""+i));
 	    System.out.println(respuesta.receive());

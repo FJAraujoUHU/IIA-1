@@ -3,23 +3,23 @@ package messaging.ports;
 import messaging.*;
 
 /**
- * Puerto de solicitud. Internamente utiliza uno de entrada y uno de salida
+ * Puerto de respuesta. Internamente utiliza uno de entrada y uno de salida
  * conectados.
  *
  * @author Francisco Javier Araujo Mendoza
  */
-public class SolicitorPort extends CommPort {
+public class ResponderPort extends CommPort {
 
     /**
      * Constructor del puerto.
      *
      * @param host Dirección a la que conectarse.
-     * @param exitSocket Puerto por el que enviar las solicitudes.
-     * @param entrySocket Puerto por el que esperar la respuesta.
-     * @param in Slot por el que enviar las solicitudes.
-     * @param out Slot por el que recibir las respuestas.
+     * @param exitSocket Puerto por el que enviar la respuesta al conector.
+     * @param entrySocket Puerto por el que recibir la solicitud del conector.
+     * @param in Slot por el que enviar las respuestas.
+     * @param out Slot por el que recibir las solicitudes.
      */
-    public SolicitorPort(String host, int exitSocket, int entrySocket, Slot in, Slot out) throws SlotException {
+    public ResponderPort(String host, int exitSocket, int entrySocket, Slot in, Slot out) throws SlotException {
         super(host, exitSocket, entrySocket, in, out);       
     }
 
@@ -30,13 +30,13 @@ public class SolicitorPort extends CommPort {
         Message request, response, output;
         do {
             try {
-                request = in.receive();
+                request = entrySlot.receive();
 
                 if (!request.isShutdown()) {
-                    exitSlot.send(request);
-                    response = entrySlot.receive();
+                    out.send(request);
+                    response = in.receive();
                     output = new Message(response.toString(), request);
-                    out.send(output);
+                    exitSlot.send(output);
                 }
 
             } catch (SlotException ex) {

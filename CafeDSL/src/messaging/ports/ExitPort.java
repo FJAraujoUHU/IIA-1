@@ -10,6 +10,8 @@ import messaging.Slot;
 import messaging.SlotException;
 
 /**
+ * Puerto que reenvía lo que le llega desde un slot de entrada por un socket de
+ * salida
  *
  * @author Francisco Javier Araujo Mendoza
  */
@@ -21,6 +23,8 @@ public class ExitPort implements Runnable {
     private volatile boolean enabled;
     private Socket socket;
     private final UUID uuid;
+    private int connectionRetries = 5;
+    private int retryWait = 10;
 
     /**
      * Constructor del puerto
@@ -30,56 +34,79 @@ public class ExitPort implements Runnable {
      * @param entrada Slot por el que recibir mensajes.
      */
     public ExitPort(String host, int puerto, Slot entrada) {
-	this.port = puerto;
-	this.host = host;
-	this.slot = entrada;
-	this.enabled = false;
-	this.socket = null;
+        this.port = puerto;
+        this.host = host;
+        this.slot = entrada;
+        this.enabled = false;
+        this.socket = null;
         uuid = UUID.randomUUID();
     }
 
     @Override
     public void run() {
-	System.out.println("Connecting to " + host + ":" + port + "...");
-	try {
-	    socket = new Socket(host, port);
-	    //Saca el stream de salida desde el puerto
-	    OutputStream os = socket.getOutputStream();
-	    //Crea un objectInput para enviar mensajes.
-	    ObjectOutputStream oos = new ObjectOutputStream(os);
-	    enabled = true;
+        System.out.println("Connecting to " + host + ":" + port + "...");
+        try {
+            boolean connected = false;
+            while (!connected && connectionRetries > 0) {
+                try {
+                    socket = new Socket(host, port);
+                    connected = true;
+                } catch (Exception ex) {
+                    System.out.println("ExitPort UUID:" + this.uuid);
+                    System.out.println("Connection failed, retrying in " + retryWait + "s (Attempts left: " + connectionRetries + ")");
+                    connectionRetries--;
+                    try {
+                        Thread.sleep(retryWait * 1000);
+                    } catch (InterruptedException ex1) {
+                        //Ignorar
+                    }
+                }
+            }
+            if (connected) {
+                System.out.println("ExitPort UUID:" + this.uuid);
+                System.out.println("Connection established!");
+                //Saca el stream de salida desde el puerto
+                OutputStream os = socket.getOutputStream();
+                //Crea un objectInput para enviar mensajes.
+                ObjectOutputStream oos = new ObjectOutputStream(os);
+                enabled = true;
 
-	    Message m;
-            do {
-                m = slot.receive();
-		oos.writeObject(m);
-            } while (slot.availableRead() && !socket.isClosed() && enabled);
-                    
-	    oos.flush();
-	} catch (IOException | SlotException ex) {
-	    if (enabled) {
-		System.out.println(ex); //si el error no ha sido al cerrarse
-	    }
-	} finally {
-	    enabled = false;
-	    try {
-		close();
-	    } catch (PortException ex) {
+                Message m;
+                do {
+                    m = slot.receive();
+                    oos.writeObject(m);
+                } while (slot.availableRead() && !socket.isClosed() && enabled);
+
+                oos.flush();
+            }
+            else {
+                System.out.println("Connection failed, port not working.");
+            }
+        } catch (IOException | SlotException ex) {
+            if (enabled) {
+                System.out.println(ex); //si el error no ha sido al cerrarse
+            }
+        } finally {
+            enabled = false;
+            try {
+                close();
+            } catch (PortException ex) {
                 /*No hacer nada, ya estaba cerrado*/
             } catch (IOException ex) {
                 System.out.println(ex);
             }
-	}
+        }
     }
 
     /**
      * Cierra la conexión forzadamente.
      *
      * @throws PortException Si el puerto ya estaba cerrado.
-     * @throws java.io.IOException Si se produce algún error cerrando los sockets.
+     * @throws java.io.IOException Si se produce algún error cerrando los
+     * sockets.
      */
     public void close() throws PortException, IOException {
-	if (!enabled) {
+        if (!enabled) {
             throw new PortException("Port already closed (UUID = " + uuid + ")");
         }
         enabled = false;
@@ -102,11 +129,12 @@ public class ExitPort implements Runnable {
      * @return Si el puerto es funcional.
      */
     public boolean available() {
-	return enabled;
+        return enabled;
     }
-    
+
     /**
      * Devuelve el UUID único del slot (es intransferible)
+     *
      * @return UUID del objeto.
      */
     public UUID getUUID() {
