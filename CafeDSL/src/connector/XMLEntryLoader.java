@@ -5,6 +5,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -24,6 +25,7 @@ public class XMLEntryLoader implements Runnable {
     final Thread portThr;
     final Path path;
     final Slot slot;
+    final UUID uuid;
     static final int CHECK_INTERVAL_MS = 2500;
 
     public XMLEntryLoader(String DSLHostname, int DSLSocket, String pathToFolder) throws SlotException, IOException {
@@ -31,6 +33,7 @@ public class XMLEntryLoader implements Runnable {
         this.output = new ExitPort(DSLHostname, DSLSocket, slot);
         this.portThr = new Thread(output);
         this.path = Paths.get(pathToFolder);
+        this.uuid = UUID.randomUUID();
 
         if (Files.notExists(path) || !Files.isDirectory(path)) {
             Files.createDirectory(path);
