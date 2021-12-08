@@ -27,7 +27,7 @@ import static xmlUtils.XMLUtils.*;
  *
  * @author Francisco Javier Araujo Mendoza
  */
-public class SQLSolicitor {
+public class SQLSolicitor implements Runnable {
 
     Connection conn;
     final EntryPort entryPort;
@@ -95,7 +95,12 @@ public class SQLSolicitor {
 
     }
 
+    @Override
     public void run() {
+        entryThread.start();
+        exitThread.start();
+        
+        
         try {
             Message m;
             do {

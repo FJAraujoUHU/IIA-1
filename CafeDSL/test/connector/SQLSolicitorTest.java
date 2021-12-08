@@ -6,7 +6,6 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import static org.junit.Assert.*;
 
 /**
  *
@@ -14,9 +13,10 @@ import static org.junit.Assert.*;
  */
 public class SQLSolicitorTest {
     
-    SQLSolicitorPort instance;
+    SQLSolicitor instance;
     Thread instanceThr;
-    Slot in, out;
+    static int REQUESTPORT = 7777;
+    static int RESPONSEPORT = 7778;
     static String SQLSELECT = "<sql>SELECT * FROM noexiste</sql>";
     static String SQLFUNCTION = "<sql>SELECT servirFria('cerveza')</sql>";
     
@@ -35,9 +35,9 @@ public class SQLSolicitorTest {
     
     @Before
     public void setUp() throws Exception {
-        in = new Slot();
-        out = new Slot();
-        instance = new SQLSolicitorPort(in, out, "b0ve.com", 3306, "cafe-05", "pass", "cafe05", false);
+        //in = new Slot();
+        //out = new Slot();
+        instance = new SQLSolicitor("localhost", RESPONSEPORT, REQUESTPORT, "b0ve.com", 3306, "cafe-05", "pass", "cafe05", false);
         instanceThr = new Thread(instance);
         instanceThr.start();
     }
@@ -71,13 +71,13 @@ public class SQLSolicitorTest {
         Message select = new Message(SQLSELECT);
         Message result;
         
-        in.send(query);
+        /*in.send(query);
         in.send(select);
-        result = out.receive(10000);
+        result = out.receive();
         System.out.println(result.toString());
-        result = out.receive(10000);
-        System.out.println(result.toString());
-        instance.close(false);
-        instanceThr.join(10000);
+        result = out.receive();
+        System.out.println(result.toString());*/
+        //instance.close(false);
+        instanceThr.join();
     }
 }
