@@ -14,9 +14,9 @@ import static org.junit.Assert.*;
  *
  * @author Francisco Javier Araujo Mendoza
  */
-public class TransformerTest {
+public class TranslatorTest {
     
-    Transformer instance;
+    Translator instance;
     Thread instanceThr;
     Slot in, out;
     static final String XSLTTEXT = "<?xml version=\"1.0\"?> <xsl:stylesheet version=\"1.0\" xmlns:xsl=\"http://www.w3.org/1999/XSL/Transform\"> <xsl:template match=\"/\"> <sql> insert into table values (<xsl:value-of select=\"drink/name\"/>,<xsl:value-of select=\"drink/type\"/>) </sql> </xsl:template> </xsl:stylesheet>";
@@ -24,7 +24,7 @@ public class TransformerTest {
     static final String EXPECTEDOUTPUT = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><sql> insert into table values (te,hot) </sql>";
     
     
-    public TransformerTest() {
+    public TranslatorTest() {
     }
     
     @BeforeClass
@@ -40,7 +40,7 @@ public class TransformerTest {
         in = new Slot();
         out = new Slot();
         
-        instance = new Transformer(in, out, new StreamSource(new StringReader(XSLTTEXT)));
+        instance = new Translator(in, out, new StreamSource(new StringReader(XSLTTEXT)));
         instanceThr = new Thread(instance);
         instanceThr.start();
     }
@@ -50,7 +50,7 @@ public class TransformerTest {
     }
 
     /**
-     * Test of run method, of class Transformer.
+     * Test of run method, of class Translator.
      */
     @Test
     public void testRun() throws SlotException, InterruptedException {

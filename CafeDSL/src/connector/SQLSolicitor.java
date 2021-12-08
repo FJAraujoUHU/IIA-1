@@ -36,14 +36,29 @@ public class SQLSolicitor implements Runnable {
     final Thread entryThread, exitThread;
     final UUID uuid;
 
+    /**
+     * Constructor.
+     * @param DSLHostname Dominio donde se hospeda el DSL
+     * @param DSLExitSocket Puerto que tiene configurado el DSL ExitPort
+     * @param DSLEntrySocket Puerto que tiene configurado el DSL EntryPort
+     * @param SQLHostname Dominio del servidor de la BD
+     * @param SQLPort Puerto de la BD
+     * @param user Usuario de la BD
+     * @param password Contraseña de la BD
+     * @param schema Schema a usar
+     * @param autocommit Si debe activarse el autocommit para la conexión.
+     * @throws ClassNotFoundException
+     * @throws SQLException
+     * @throws SlotException 
+     */
     public SQLSolicitor(String DSLHostname, int DSLExitSocket, int DSLEntrySocket, String SQLHostname, int SQLPort, String user, String password, String schema, boolean autocommit) throws ClassNotFoundException, SQLException, SlotException {
         String url = "jdbc:mysql://" + SQLHostname + ":" + SQLPort + "/" + schema + "?user=" + user + "&password=" + password;
 
         uuid = UUID.randomUUID();
         entrySlot = new Slot();
         exitSlot = new Slot();
-        entryPort = new EntryPort(DSLEntrySocket, entrySlot);
-        exitPort = new ExitPort(DSLHostname, DSLExitSocket, exitSlot);
+        entryPort = new EntryPort(DSLExitSocket, entrySlot);
+        exitPort = new ExitPort(DSLHostname, DSLEntrySocket, exitSlot);
         entryThread = new Thread(entryPort);
         exitThread = new Thread(exitPort);
 

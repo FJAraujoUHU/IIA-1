@@ -49,7 +49,7 @@ public class XMLUtils {
             xtrans.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
             StringWriter writer = new StringWriter();
             StreamResult result = new StreamResult(writer);
-            
+
             for (int i = 0; i < nl.getLength(); i++) {
                 Node n = nl.item(i);
                 xtrans.transform(new DOMSource(n), result);
@@ -66,7 +66,7 @@ public class XMLUtils {
             Transformer xtrans = TransformerFactory.newInstance().newTransformer();
             xtrans.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
             List<String> ret = new ArrayList<>();
-            
+
             for (int i = 0; i < nl.getLength(); i++) {
                 Node n = nl.item(i);
                 StringWriter writer = new StringWriter();
@@ -81,7 +81,7 @@ public class XMLUtils {
         }
     }
 
-    public static Document stringToDocument(String str) throws  IOException, SAXException {
+    public static Document stringToDocument(String str) throws IOException, SAXException {
         try {
             return DocumentBuilderFactory
                     .newInstance()
@@ -92,7 +92,7 @@ public class XMLUtils {
             return null;
         }
     }
-    
+
     public static boolean compareNodeList(NodeList list1, NodeList list2) {
         if (list1 == list2) {
             return true;
@@ -106,8 +106,24 @@ public class XMLUtils {
         for (int i = 0; i < list1.getLength(); i++) {
             Node n1 = list1.item(i);
             Node n2 = list2.item(i);
-            if (!n1.isEqualNode(n2))
-                return false;    
+            
+            //Comprobar si son del mismo tipo
+            if (n1.getNodeType() == n2.getNodeType()) {
+                if (!n1.isEqualNode(n2))    //Si son iguales, compararlos como iguales.
+                    return false;
+            } else {
+                String n1Value = n1.getNodeValue();
+                String n2Value = n2.getNodeValue();
+                
+                //Si sus valores no son null, compararlos
+                if (n1Value != null && n2Value != null) {
+                    if (!n1Value.equals(n2Value))
+                        return false;
+                } else if (n1Value != n2Value) {
+                    //Si sólo uno de ellos es null y el otro no, son distintos
+                    return false;
+                }
+            }
         }
         return true;
     }

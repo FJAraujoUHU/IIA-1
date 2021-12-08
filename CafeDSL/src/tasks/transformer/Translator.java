@@ -15,10 +15,10 @@ import messaging.SlotException;
 import tasks.Task;
 
 /**
- * Tarea Transformer.
+ * Tarea Translator.
  * @author Francisco Javier Araujo Mendoza
  */
-public class Transformer extends Task {
+public class Translator extends Task {
 
     private final javax.xml.transform.Transformer xslt;
 
@@ -29,7 +29,7 @@ public class Transformer extends Task {
      * @param xslt Objeto que contenga el XSLT con el que hacer la transformación.
      * @throws TransformerConfigurationException Si el XSLT está mal formado.
      */
-    public Transformer(Slot input, Slot output, Source xslt) throws TransformerConfigurationException {
+    public Translator(Slot input, Slot output, Source xslt) throws TransformerConfigurationException {
         super(input, output);
         this.xslt = TransformerFactory.newInstance().newTransformer(xslt);
     }
