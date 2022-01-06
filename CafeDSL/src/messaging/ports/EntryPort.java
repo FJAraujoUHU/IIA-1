@@ -1,5 +1,6 @@
 package messaging.ports;
 
+import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
@@ -56,12 +57,13 @@ public class EntryPort implements Runnable {
                 slot.send(m);
             } while (slot.availableWrite() && !socket.isClosed() && enabled);
 
+        } catch (EOFException ex) {
+            //Se produce al ir cerrando el sistema, proceder a cerrar con finally
         } catch (IOException | ClassNotFoundException | SlotException ex) {
             if (enabled) {
                 System.out.println(ex); //si el error no ha sido al cerrarse
             }
         } finally {
-            enabled = false;
             try {
                 close();
             } catch (PortException ex) {

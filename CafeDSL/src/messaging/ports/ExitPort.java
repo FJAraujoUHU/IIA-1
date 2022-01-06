@@ -1,5 +1,6 @@
 package messaging.ports;
 
+import java.io.EOFException;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
@@ -24,7 +25,7 @@ public class ExitPort implements Runnable {
     private Socket socket;
     private final UUID uuid;
     private int connectionRetries = 5;
-    private int retryWait = 10;
+    private int retryWait = 5;
 
     /**
      * Constructor del puerto
@@ -82,12 +83,13 @@ public class ExitPort implements Runnable {
             else {
                 System.out.println("Connection failed, port not working.");
             }
+        } catch (EOFException ex) {
+            //Se produce al ir cerrando el sistema, proceder a cerrar con finally
         } catch (IOException | SlotException ex) {
             if (enabled) {
                 System.out.println(ex); //si el error no ha sido al cerrarse
             }
         } finally {
-            enabled = false;
             try {
                 close();
             } catch (PortException ex) {

@@ -46,9 +46,9 @@ public class XMLEntryLoader implements Runnable {
                 slot.close();
             }
             if (output.available()) {
-                output.close();
+                //output.close();
             }
-        } catch (SlotException | PortException | IOException ex) {
+        } catch (SlotException/* | PortException | IOException*/ ex) {
             //No debería fallar al realizar las comprobaciones previas, ignorar
         }
 

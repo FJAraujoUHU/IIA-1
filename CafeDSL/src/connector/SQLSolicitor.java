@@ -38,6 +38,7 @@ public class SQLSolicitor implements Runnable {
 
     /**
      * Constructor.
+     *
      * @param DSLHostname Dominio donde se hospeda el DSL
      * @param DSLExitSocket Puerto que tiene configurado el DSL ExitPort
      * @param DSLEntrySocket Puerto que tiene configurado el DSL EntryPort
@@ -49,7 +50,7 @@ public class SQLSolicitor implements Runnable {
      * @param autocommit Si debe activarse el autocommit para la conexión.
      * @throws ClassNotFoundException
      * @throws SQLException
-     * @throws SlotException 
+     * @throws SlotException
      */
     public SQLSolicitor(String DSLHostname, int DSLExitSocket, int DSLEntrySocket, String SQLHostname, int SQLPort, String user, String password, String schema, boolean autocommit) throws ClassNotFoundException, SQLException, SlotException {
         String url = "jdbc:mysql://" + SQLHostname + ":" + SQLPort + "/" + schema + "?user=" + user + "&password=" + password;
@@ -79,15 +80,21 @@ public class SQLSolicitor implements Runnable {
             try {
                 exitPort.close();
             } catch (PortException ex) {
-                /*Nunca debería lanzarse porque se comprueba primero si está abierto*/
+                //Nunca debería lanzarse porque se comprueba primero si está abierto
             }
         }
         if (entryPort.available()) {
             try {
                 entryPort.close();
             } catch (PortException ex) {
-                /*Nunca debería lanzarse porque se comprueba primero si está abierto*/
+                //Nunca debería lanzarse porque se comprueba primero si está abierto
             }
+        }
+        try {
+            entryThread.join(10000);
+            exitThread.join(10000);
+        } catch (InterruptedException ex) {
+            //Ignorar
         }
     }
 
@@ -97,15 +104,21 @@ public class SQLSolicitor implements Runnable {
             try {
                 exitPort.close();
             } catch (PortException ex) {
-                /*Nunca debería lanzarse porque se comprueba primero si está abierto*/
+                //Nunca debería lanzarse porque se comprueba primero si está abierto
             }
         }
         if (entryPort.available()) {
             try {
                 entryPort.close();
             } catch (PortException ex) {
-                /*Nunca debería lanzarse porque se comprueba primero si está abierto*/
+                //Nunca debería lanzarse porque se comprueba primero si está abierto
             }
+        }
+        try {
+            entryThread.join(10000);
+            exitThread.join(10000);
+        } catch (InterruptedException ex) {
+            //Ignorar
         }
 
     }
@@ -114,8 +127,7 @@ public class SQLSolicitor implements Runnable {
     public void run() {
         entryThread.start();
         exitThread.start();
-        
-        
+
         try {
             Message m;
             do {
@@ -186,8 +198,14 @@ public class SQLSolicitor implements Runnable {
                 }
 
             } while (!conn.isClosed() && entrySlot.availableRead() && exitSlot.availableWrite());
-            this.close(true);
 
+        } catch (SQLException ex) {
+            Logger.getLogger(SQLSolicitor.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
+        
+        try {
+            this.close(true);
         } catch (SQLException | IOException ex) {
             Logger.getLogger(SQLSolicitor.class.getName()).log(Level.SEVERE, null, ex);
         }

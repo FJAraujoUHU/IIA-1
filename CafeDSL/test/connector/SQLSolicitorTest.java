@@ -1,6 +1,8 @@
 package connector;
 
 import messaging.*;
+import messaging.ports.EntryPort;
+import messaging.ports.ExitPort;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -79,5 +81,43 @@ public class SQLSolicitorTest {
         System.out.println(result.toString());*/
         //instance.close(false);
         instanceThr.join();
+    }
+    
+    
+    @Test
+    public void testShutdown() throws Exception {
+        System.out.println("shutdown");
+
+        Slot querySlot, resultSlot;
+        querySlot = new Slot();
+        resultSlot = new Slot();
+       
+        ExitPort queryPort = new ExitPort("localhost", RESPONSEPORT, querySlot);
+        EntryPort resultPort = new EntryPort(REQUESTPORT, resultSlot);
+        Thread exitThr = new Thread(queryPort);
+        Thread entryThr = new Thread(resultPort);
+        exitThr.start();
+        entryThr.start();
+        
+        
+        
+        Message query = new Message(SQLFUNCTION);
+        Message select = new Message(SQLSELECT);
+        Message result;
+        
+        //querySlot.send(select);
+        querySlot.send(Message.SHUTDOWN);
+        /*in.send(query);
+        in.send(select);
+        result = out.receive();
+        System.out.println(result.toString());
+        result = out.receive();
+        System.out.println(result.toString());*/
+        //instance.close(false);
+        //System.out.println(resultSlot.receive().toString());
+        //result = resultSlot.receive();
+        instanceThr.join();
+        exitThr.join();
+        entryThr.join();
     }
 }

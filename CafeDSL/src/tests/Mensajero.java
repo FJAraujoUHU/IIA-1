@@ -109,8 +109,11 @@ public class Mensajero {
 		Message m;
                 do {
                     m = (Message) ois.readObject();
-		    System.out.println("Mensaje de " + socket.getInetAddress().getCanonicalHostName() + ":" + socket.getPort() + " ID=" + m.getInternalId().toString() + ":");
-		    System.out.println(m);
+                    if (!m.isShutdown())
+                        System.out.println("Mensaje de " + socket.getInetAddress().getCanonicalHostName() + ":" + socket.getPort() + " ID=" + m.getInternalId().toString() + ":" + m.toString());
+                    else
+                        System.out.println("Mensaje de cierre de" + socket.getInetAddress().getCanonicalHostName() + ":" + socket.getPort());
+                    System.out.println(m);
                 } while (!m.isShutdown() && !socket.isClosed());
 
 		System.out.println("Cerrando conexión y saliendo...");
