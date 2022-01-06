@@ -12,7 +12,7 @@ import messaging.ports.EntryPort;
 import messaging.ports.PortException;
 
 /**
- *
+ * Conector que escribe los mensajes que le lleguen como archivos XML, usando el UUID como nombre.
  * @author Francisco Javier Araujo Mendoza
  */
 public class XMLExitWriter implements Runnable {

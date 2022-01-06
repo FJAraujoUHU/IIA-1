@@ -9,7 +9,7 @@ import static org.junit.Assert.*;
 import org.w3c.dom.NodeList;
 
 /**
- *
+ * Test de algunas XMLUtils
  * @author Francisco Javier Araujo Mendoza
  */
 public class XMLUtilsTest {

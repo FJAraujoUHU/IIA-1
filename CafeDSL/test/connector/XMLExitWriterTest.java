@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/UnitTests/JUnit4TestClass.java to edit this template
- */
 package connector;
 
 import java.io.IOException;
@@ -11,10 +7,9 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import static org.junit.Assert.*;
 
 /**
- *
+ * Test del conector de salida XML, para uso con Mensajero
  * @author Francisco Javier Araujo Mendoza
  */
 public class XMLExitWriterTest {

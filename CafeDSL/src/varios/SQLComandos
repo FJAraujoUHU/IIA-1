@@ -1,3 +1,6 @@
+---------Comandos necesarios para recrear la BBDD de Café----------
+
+
 USE cafe05;
 DROP TABLE bebidasFrias;
 DROP TABLE bebidasCalientes;
