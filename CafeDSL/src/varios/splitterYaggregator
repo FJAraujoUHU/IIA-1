@@ -1,0 +1,53 @@
+    /--------------/ combinar todos los mensajes en uno
+
+<root>
+<drink><name>te</name><type>hot</type><METADATA>id1</METADATA></drink>
+<drink><name>cerveza</name><type>cold</type><METADATA>id2</METADATA></drink>
+</root>
+
+/--------------/ insertarlos en la cabecera
+
+<?xml version="1.0" encoding="UTF-8"?>
+<xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0">
+<xsl:strip-space elements="*"/>
+   <xsl:template match="/">
+<cafe_order><order_id>5</order_id><drinks>
+
+<xsl:copy-of select="//*[METADATA='id1']"/>
+<xsl:copy-of select="//*[METADATA='id2']"/>
+
+
+</drinks></cafe_order>
+</xsl:template>
+</xsl:stylesheet>
+
+/--------------/ guardar el resultado, con el tag de metadata aun puesto
+
+<cafe_order>
+   <order_id>5</order_id>
+   <drinks>
+      <drink>
+         <name>te</name>
+         <type>hot</type>
+         <METADATA>id1</METADATA>
+      </drink>
+      <drink>
+         <name>cerveza</name>
+         <type>cold</type>
+         <METADATA>id2</METADATA>
+      </drink>
+   </drinks>
+</cafe_order>
+
+/--------------/ aplicar la transformacion para eliminar la metadata de los resultados
+
+<?xml version="1.0" encoding="UTF-8"?>
+<xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0">
+<xsl:strip-space elements="*"/>
+<xsl:template match="@*|node()">
+    <xsl:copy>
+        <xsl:apply-templates select="@*|node()"/>
+    </xsl:copy>
+</xsl:template>
+<xsl:template match="METADATA"/>
+</xsl:stylesheet>

@@ -11,6 +11,7 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import messaging.*;
 import messaging.ports.ExitPort;
+import messaging.ports.PortException;
 
 /**
  * Lector de archivos XML para enviar al DSL. Comprueba periódicamente si hay
@@ -25,7 +26,7 @@ public class XMLEntryLoader implements Runnable {
     final Path path;
     final Slot slot;
     final UUID uuid;
-    static final int CHECK_INTERVAL_MS = 2500; //Tiempo entre checks para ver si hay nuevos archivos
+    static final int CHECK_INTERVAL_MS = 2500;
 
     public XMLEntryLoader(String DSLHostname, int DSLSocket, String pathToFolder) throws SlotException, IOException {
         this.slot = new Slot();
@@ -44,7 +45,10 @@ public class XMLEntryLoader implements Runnable {
             if (slot.availableWrite()) {
                 slot.close();
             }
-        } catch (SlotException ex) {
+            if (output.available()) {
+                //output.close();
+            }
+        } catch (SlotException/* | PortException | IOException*/ ex) {
             //No debería fallar al realizar las comprobaciones previas, ignorar
         }
 
@@ -91,7 +95,7 @@ public class XMLEntryLoader implements Runnable {
         try {
             portThr.join(10000);
         } catch (InterruptedException ex) {
-            //Ignorar, se está cerrando
+            //Ignorar
         }
     }
 }

@@ -25,7 +25,7 @@ import tasks.router.*;
  *
  * @author Francisco Javier Araujo Mendoza
  */
-public class CafeDSL {
+public class CafeDSLDebug {
 
     //Valores dependientes de la configuración
     static final String DB_SERVER = "b0ve.com";
@@ -72,7 +72,7 @@ public class CafeDSL {
     Merger me11;
     Aggregator ag12;
 
-    public CafeDSL() {
+    public CafeDSLDebug() {
     }
 
     @BeforeClass
@@ -113,66 +113,26 @@ public class CafeDSL {
 
         //Inicio de los conectores
         comandasConn = new XMLEntryLoader("localhost", SOCKET_COMANDAS, FOLDER_COMANDAS);
-        barmanFrioConn = new SQLSolicitor("localhost", SOCKET_BF_EXIT, SOCKET_BF_ENTRY, DB_SERVER, DB_PORT, DB_USERNAME, DB_PASSWD, DB_SCHEMA, true);
-        barmanCalienteConn = new SQLSolicitor("localhost", SOCKET_BC_EXIT, SOCKET_BC_ENTRY, DB_SERVER, DB_PORT, DB_USERNAME, DB_PASSWD, DB_SCHEMA, true);
-        camareroConn = new XMLExitWriter(SOCKET_CAMARERO, FOLDER_CAMARERO);
 
         //Inicio de los puertos
         comandas = new EntryPort(SOCKET_COMANDAS, slot[0]);
-        barmanFrio = new SolicitorPort("localhost", SOCKET_BF_EXIT, SOCKET_BF_ENTRY, slot[8], slot[10]);
-        barmanCaliente = new SolicitorPort("localhost", SOCKET_BC_EXIT, SOCKET_BC_ENTRY, slot[9], slot[11]);
-        camarero = new ExitPort("localhost", SOCKET_CAMARERO, slot[19]);
-
-        //Inicio de las tareas
-        split1 = new Splitter(slot[0], slot[1], split1exp);
-        dist2 = new Distributor(slot[1], new Slot[]{slot[2], slot[3]}, new XPathExpression[]{dist2condFria, dist2condCaliente});
-
-        //rama fría
-        rep3f = new Replicator(slot[2], new Slot[]{slot[4], slot[6]});
-        tr4f = new Translator(slot[4], slot[8], new StreamSource(new StringReader(tr4fXSLT)));
-        co5f = new XPathCorrelator(new Slot[]{slot[6], slot[10]}, new Slot[]{slot[12], slot[14]}, co5condCorr);
-        ce6f = new ContentEnricher(slot[12], slot[14], slot[16], ce6affix, ce6location);
-
-        //rama caliente
-        rep3c = new Replicator(slot[3], new Slot[]{slot[5], slot[7]});
-        tr4c = new Translator(slot[5], slot[9], new StreamSource(new StringReader(tr4cXSLT)));
-        co5c = new XPathCorrelator(new Slot[]{slot[7], slot[11]}, new Slot[]{slot[13], slot[15]}, co5condCorr);
-        ce6c = new ContentEnricher(slot[13], slot[15], slot[17], ce6affix, ce6location);
-
-        //Fin
-        me11 = new Merger(new Slot[]{slot[16], slot[17]}, slot[18]);
-        ag12 = new Aggregator(slot[18], slot[19], split1);
-
-        
-        
-        
-        
-        
-        //Arranque del sistema
-        executor.execute(comandasConn);
-        executor.execute(barmanFrioConn);
-        executor.execute(barmanCalienteConn);
-        executor.execute(camareroConn);
         
         executor.execute(comandas);
-        executor.execute(barmanFrio);
-        executor.execute(barmanCaliente);
-        executor.execute(camarero);
+        executor.execute(comandasConn);
         
-        executor.execute(split1);
-        executor.execute(dist2);
-        executor.execute(rep3f);
-        executor.execute(rep3c);
-        executor.execute(tr4f);
-        executor.execute(tr4c);
-        executor.execute(co5f);
-        executor.execute(co5c);
-        executor.execute(ce6f);
-        executor.execute(ce6c);
-        executor.execute(me11);
-        executor.execute(ag12);
-        
+
+        while (slot[0].availableWrite()) {
+            if (slot[0].availableRead()) {
+                Message m = slot[0].receive();
+                if (m.isShutdown()) {
+                    System.out.println("Recibida orden de cierre");
+                } else {
+                    System.out.println("Salida: " + m.toString());
+                }   
+            }         
+        }
         executor.shutdown();
-        executor.awaitTermination(5, TimeUnit.MINUTES);
+        /*if (!executor.awaitTermination(30, TimeUnit.SECONDS))
+            executor.shutdownNow();*/
     }
 }

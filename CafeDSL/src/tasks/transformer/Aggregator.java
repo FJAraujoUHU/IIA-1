@@ -2,6 +2,7 @@ package tasks.transformer;
 
 import java.io.ByteArrayInputStream;
 import java.io.StringWriter;
+import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;

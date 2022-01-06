@@ -9,9 +9,8 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-
 /**
- * Test del conector de solicitudes SQL
+ *
  * @author Francisco Javier Araujo Mendoza
  */
 public class SQLSolicitorTest {
@@ -48,6 +47,19 @@ public class SQLSolicitorTest {
     @After
     public void tearDown() {
     }
+
+    /**
+     * Test of close method, of class SQLSolicitor.
+     */
+    /*@Test
+    public void testClose() throws Exception {
+        System.out.println("close");
+        boolean commit = false;
+        SQLSolicitorPort instance = null;
+        instance.close(commit);
+        // TODO review the generated test code and remove the default call to fail.
+        fail("The test case is a prototype.");
+    }*/
 
     /**
      * Test of run method, of class SQLSolicitorPort.
@@ -93,7 +105,17 @@ public class SQLSolicitorTest {
         Message select = new Message(SQLSELECT);
         Message result;
         
+        //querySlot.send(select);
         querySlot.send(Message.SHUTDOWN);
+        /*in.send(query);
+        in.send(select);
+        result = out.receive();
+        System.out.println(result.toString());
+        result = out.receive();
+        System.out.println(result.toString());*/
+        //instance.close(false);
+        //System.out.println(resultSlot.receive().toString());
+        //result = resultSlot.receive();
         instanceThr.join();
         exitThr.join();
         entryThr.join();

@@ -5,13 +5,14 @@ import messaging.Slot;
 import messaging.SlotException;
 import org.junit.After;
 import org.junit.AfterClass;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
 /**
- * Test de comunicación entre puertos de entrada y de salida
+ *
  * @author Francisco Javier Araujo Mendoza
  */
 public class PortCommunication {

@@ -16,9 +16,7 @@ import messaging.Message;
  * Tester/placeholder de conector de aplicaciones (Para ejecutar, Shift+F6)
  * ESTA CLASE NO DEBERÍA SER LA MAIN POR DEFECTO, COMPROBAR EN PROPIEDADES DEL PROYECTO
  * @author Francisco Javier Araujo Mendoza
- * @deprecated
  */
-@Deprecated
 public class Mensajero {
 
     public static void main(String[] args) {

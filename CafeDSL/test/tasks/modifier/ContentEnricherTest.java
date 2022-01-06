@@ -14,7 +14,7 @@ import org.junit.Test;
 import static org.junit.Assert.*;
 
 /**
- * Test del content enricher
+ *
  * @author Francisco Javier Araujo Mendoza
  */
 public class ContentEnricherTest {

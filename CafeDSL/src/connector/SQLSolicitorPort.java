@@ -20,12 +20,9 @@ import static xmlUtils.XMLUtils.*;
 
 /**
  * Reemplazo de Solicitor Port diseñado para usar con SQL
- * En lugar de funcionar como un conector, reemplaza un puerto Solicitor.
  *
  * @author Francisco Javier Araujo Mendoza
- * @deprecated 
  */
-@Deprecated
 public class SQLSolicitorPort implements Runnable {
 
     Connection conn;

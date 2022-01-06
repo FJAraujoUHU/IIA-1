@@ -8,7 +8,7 @@ import org.junit.Test;
 import static org.junit.Assert.*;
 
 /**
- * Test de la clase Slot
+ *
  * @author Francisco Javier Araujo Mendoza
  */
 public class SlotTest {
