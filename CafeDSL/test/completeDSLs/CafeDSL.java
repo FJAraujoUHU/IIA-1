@@ -16,14 +16,15 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import static org.junit.Assert.*;
 import tasks.transformer.*;
 import tasks.modifier.*;
 import tasks.router.*;
 
 /**
- *
+ * DSL Completo para café (Como Unidad de JUnit, como ejemplo de uso de la librería)
+ * 
  * @author Francisco Javier Araujo Mendoza
+ * 
  */
 public class CafeDSL {
 

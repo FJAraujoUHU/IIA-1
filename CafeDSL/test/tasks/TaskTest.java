@@ -11,7 +11,7 @@ import org.junit.Test;
 import static org.junit.Assert.*;
 
 /**
- *
+ * Test de las tareas, implementando una genérica
  * @author Francisco Javier Araujo Mendoza
  */
 public class TaskTest {
